@@ -1,507 +1,426 @@
+
+
+---
+
 # Chatbot Platform (Minimal)
 
-A minimal multi-user chatbot platform with:
-- JWT Authentication (Register/Login)
-- Projects/Agents under each user
-- Prompts stored per project
-- Chats + Messages stored in Postgres
-- LLM replies using OpenRouter API
+A minimal multi-user **Chatbot Platform** built with:
+
+* **Backend:** Node.js + Express + Prisma + PostgreSQL
+* **Auth:** JWT (Register/Login)
+* **Frontend:** React + Vite
+* **LLM Provider:** OpenRouter (Chat Completions API)
+* **Deploy:** Render (Backend + Postgres) + Vercel (Frontend)
+
+---
+
+## Features
+
+✅ User Registration + Login (JWT)
+✅ Create Projects/Agents under a user
+✅ Store Prompts per Project (Default prompt supported)
+✅ Create Chats under a Project
+✅ Send Messages and get AI replies
+✅ Messages stored in PostgreSQL
+✅ Public hosted demo (Frontend + Backend)
 
 ---
 
 ## Tech Stack
 
 ### Backend
-- Node.js + Express
-- PostgreSQL
-- Prisma ORM
-- JWT Auth
-- Zod validation
-- OpenRouter API for chat completions
+
+* Node.js
+* Express
+* Prisma ORM
+* PostgreSQL
+* JWT Authentication
+* Zod validation
 
 ### Frontend
-- React + Vite
-- React Router DOM
-- Clean UI (Projects + Chats + Chat panel)
+
+* React (Vite)
+* React Router DOM
+
+### LLM
+
+* OpenRouter Chat Completions API
 
 ---
 
-## Features
+## Project Structure
 
-✅ Register / Login  
-✅ Create Projects (Agents)  
-✅ Create Chats inside a Project  
-✅ Store Messages in DB  
-✅ Chat with LLM using OpenRouter  
-✅ Multi-user data isolation (auth protected)
-
----
-
-## Folder Structure
-
+```
 chatbot-platform/
-backend/
-frontend/
+  backend/
+    prisma/
+      schema.prisma
+      migrations/
+    src/
+      routes/
+      services/
+      middleware/
+      config/
+    package.json
 
+  frontend/
+    src/
+      pages/
+      api.js
+    package.json
+```
 
 ---
 
-# Backend Setup (Node + Express + Postgres)
+# Local Setup (Run on your PC)
 
-<!-- 1) Install dependencies
+## 1) Clone Repo
+
+```bash
+git clone <YOUR_GITHUB_REPO_URL>
+cd chatbot-platform
+```
+
+---
+
+## 2) Backend Setup
+
+### Go to backend folder
+
 ```bash
 cd backend
 npm install
+```
 
-## 2) Create .env file
+### Create `.env`
 
-Create backend/.env:
+Create a file: `backend/.env`
 
+Example:
+
+```env
 PORT=4000
 DATABASE_URL="postgresql://chatbot_user:YOUR_PASSWORD@localhost:5432/chatbot_platform?schema=public"
 JWT_SECRET="super_secret_change_me"
-OPENROUTER_API_KEY="YOUR_OPENROUTER_KEY"
+
+OPENROUTER_API_KEY="sk-or-v1-xxxxxxxxxxxxxxxxxxxx"
 OPENROUTER_MODEL="mistralai/mistral-7b-instruct"
 OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
+
 CORS_ORIGIN="http://localhost:5173"
+```
 
-3) Run Prisma migration
-npx prisma generate
+---
+
+### Run Prisma migration
+
+```bash
 npx prisma migrate dev --name init
+npx prisma generate
+```
 
-4) Start backend
+---
+
+### Start backend
+
+```bash
 npm run dev
-
+```
 
 Backend runs at:
 
-http://localhost:4000 
+```
+http://localhost:4000
+```
 
-Frontend Setup (React + Vite)
-1) Install dependencies
+---
+
+## 3) Frontend Setup
+
+### Go to frontend folder
+
+```bash
 cd ../frontend
 npm install
+```
 
-2) Start frontend
+### Create `.env`
+
+Create a file: `frontend/.env`
+
+```env
+VITE_API_BASE_URL=http://localhost:4000/api
+```
+
+---
+
+### Start frontend
+
+```bash
 npm run dev
-
+```
 
 Frontend runs at:
 
+```
 http://localhost:5173
+```
 
-API Testing (Postman)
-1) Register
+---
+
+# API Testing (Postman)
+
+## Auth
+
+### Register (No token needed)
 
 POST:
 
-http://localhost:4000/api/auth/register
+```
+/api/auth/register
+```
 
+Body:
 
-Body (JSON):
-
+```json
 {
   "name": "Bhuvan",
   "email": "bhuvan@gmail.com",
   "password": "123456"
 }
+```
 
-2) Login
+### Login (No token needed)
 
 POST:
 
-http://localhost:4000/api/auth/login
+```
+/api/auth/login
+```
 
+Body:
 
-Body (JSON):
-
+```json
 {
   "email": "bhuvan@gmail.com",
   "password": "123456"
 }
+```
 
+Copy the token from response.
 
-Copy token from response and use it in:
-Authorization → Bearer Token
+---
 
-3) Projects
+## Use Token in Protected APIs
+
+Header:
+
+```
+Authorization: Bearer <TOKEN>
+```
+
+---
+
+## Projects
+
+### Create Project
+
+POST:
+
+```
+/api/projects
+```
+
+Body:
+
+```json
+{
+  "name": "My First Agent",
+  "description": "Testing chatbot platform"
+}
+```
+
+### List Projects
 
 GET:
 
-http://localhost:4000/api/projects
+```
+/api/projects
+```
 
+---
+
+## Prompts
+
+### Create Prompt
 
 POST:
 
-http://localhost:4000/api/projects
-
+```
+/api/projects/:projectId/prompts
+```
 
 Body:
 
+```json
 {
-  "name": "My Agent",
-  "description": "Testing chatbot platform"
+  "title": "Default Prompt",
+  "content": "You are a helpful assistant. Reply clearly and briefly.",
+  "isDefault": true
 }
+```
 
-4) Chats
+---
+
+## Chats
+
+### Create Chat
 
 POST:
 
-http://localhost:4000/api/projects/:projectId/chats
-
+```
+/api/projects/:projectId/chats
+```
 
 Body:
 
+```json
 {
   "title": "First Chat"
 }
+```
 
+### List Chats
 
 GET:
 
-http://localhost:4000/api/projects/:projectId/chats
+```
+/api/projects/:projectId/chats
+```
 
-5) Messages
+---
+
+## Messages
+
+### Get Messages
+
+GET:
+
+```
+/api/chats/:chatId/messages
+```
+
+### Send Message (AI Reply)
 
 POST:
 
-http://localhost:4000/api/chats/:chatId/messages
-
+```
+/api/chats/:chatId/messages
+```
 
 Body:
 
+```json
 {
-  "content": "Hi"
+  "content": "Hello!"
 }
-
-
-GET:
-
-http://localhost:4000/api/chats/:chatId/messages
--->
-
-<!-- Notes
-
-All protected routes require JWT token.
-
-Messages are stored in PostgreSQL.
-
-AI replies are generated using OpenRouter.
-
-Future Improvements
-
-Prompt selection UI
-
-File upload support
-
-Analytics dashboard
-
-Streaming responses -->
-
+```
 
 ---
 
-# ✅ 2) Architecture / Design Doc (Markdown)
+# Deployment
 
-Create file: **`ARCHITECTURE.md`** in root:
+## Backend (Render)
 
-```md
-# Architecture / Design (Chatbot Platform)
+### 1) Create Render PostgreSQL
 
-## Overview
-This project is a minimal multi-user chatbot platform where:
-- Users register/login using JWT authentication.
-- Each user can create Projects (Agents).
-- Each Project can store Prompts.
-- Each Project can have multiple Chats.
-- Each Chat contains Messages (user + assistant).
-- Assistant replies are generated using OpenRouter LLM API.
+* Create 1 free PostgreSQL database
+* Copy **Internal Database URL**
 
----
+### 2) Create Render Web Service
 
-## High-Level Architecture
+* Connect GitHub repo
+* Root directory: `backend`
 
-Frontend (React + Vite)
-→ Backend API (Node + Express)
-→ Database (PostgreSQL via Prisma)
-→ LLM Provider (OpenRouter)
+### 3) Render Environment Variables
 
----
+Set these in Render backend service:
 
-## Components
+```env
+DATABASE_URL=<Render Internal Database URL>
+JWT_SECRET=<your-secret>
+OPENROUTER_API_KEY=<your-openrouter-key>
+OPENROUTER_MODEL=mistralai/mistral-7b-instruct
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+CORS_ORIGIN=*
+```
 
-### 1) Frontend (React)
-Responsibilities:
-- Authentication screens (Login/Register)
-- Dashboard UI (Projects sidebar, Chats list, Chat panel)
-- API calls using `fetch` wrapper
-- Stores JWT token in localStorage
+### 4) Build / Start Commands
 
-Key pages:
-- Login.jsx
-- Register.jsx
-- AppHome.jsx (main dashboard)
+Build Command:
 
----
+```bash
+npm install && npx prisma generate
+```
 
-### 2) Backend (Express API)
-Responsibilities:
-- User authentication + JWT issuance
-- Authorization middleware (authGuard)
-- CRUD for Projects, Prompts, Chats
-- Message storage + retrieval
-- LLM integration via OpenRouter API
+Start Command:
 
-Routes (example):
-- POST /api/auth/register
-- POST /api/auth/login
-- GET/POST /api/projects
-- GET/POST /api/projects/:projectId/chats
-- GET/POST /api/chats/:chatId/messages
-
----
-
-### 3) Database (PostgreSQL + Prisma)
-Entities:
-
-#### User
-- id
-- name
-- email (unique)
-- passwordHash
-- createdAt
-
-#### Project
-- id
-- userId (FK → User)
-- name
-- description
-- createdAt
-
-#### Prompt
-- id
-- projectId (FK → Project)
-- title
-- content
-- isDefault
-
-#### Chat
-- id
-- projectId (FK → Project)
-- title
-- createdAt
-
-#### Message
-- id
-- chatId (FK → Chat)
-- role (user/assistant)
-- content
-- createdAt
-
----
-
-## Security
-- Password hashing (bcrypt)
-- JWT token validation for protected endpoints
-- User data isolation:
-  - All queries validate `userId` ownership
-- CORS restricted to frontend origin
-
----
-
-## Scalability Notes
-- Stateless backend (JWT auth) → horizontally scalable
-- DB indexes on foreign keys improve performance
-- Chat message context limited to last 20 messages to reduce LLM latency
-
----
-
-## Reliability / Error Handling
-- asyncHandler wrapper for clean async errors
-- Zod validation for request bodies
-- LLM failures return safe JSON error messages
-
----
-
-## Extensibility
-Future additions supported by design:
-- Add analytics per project/chat
-- Add file uploads (OpenAI Files API or S3)
-- Add streaming responses
-- Add integrations (Slack/WhatsApp)
-
-
-✅ 3) Deploy Steps (Render + Vercel)
-✅ Backend Deploy on Render
-Step A: Push to GitHub
-
-Make sure your repo has:
-
-backend/
-frontend/
-README.md
-ARCHITECTURE.md
-
-
-Push it to GitHub.
-
-Step B: Create Postgres DB (Render)
-
-Go to Render Dashboard
-
-Create → PostgreSQL
-
-Copy the Internal Database URL
-
-Step C: Create Backend Web Service (Render)
-
-Render → Create → Web Service
-
-Connect GitHub repo
-
-Root directory: backend
-
-Build command:
-
-npm install && npx prisma generate && npx prisma migrate deploy
-
-
-Start command:
-
+```bash
 node src/server.js
+```
 
-Step D: Add Environment Variables (Render)
+(If tables are missing, run migrations locally before deploying OR run migrate deploy on server setup.)
 
-In Render backend service settings, add:
+---
 
-DATABASE_URL = (Render Postgres URL)
+## Frontend (Vercel)
 
-JWT_SECRET = super_secret_change_me
+### 1) Import GitHub repo
 
-OPENROUTER_API_KEY = your key
+* Framework: **Vite**
+* Root directory: `frontend`
 
-OPENROUTER_MODEL = mistralai/mistral-7b-instruct
+### 2) Add Vercel Environment Variable
 
-OPENROUTER_BASE_URL = https://openrouter.ai/api/v1
+```env
+VITE_API_BASE_URL=https://<YOUR_RENDER_BACKEND_URL>/api
+```
 
-CORS_ORIGIN = (your Vercel frontend URL after deploy)
+### 3) Deploy
 
-Step E: Prisma migrate deploy
+After deploy, update backend CORS:
 
-Render will run this automatically using build command:
-
-npx prisma migrate deploy
-
-
-Backend will be live like:
-
-https://your-backend.onrender.com
-
-✅ Frontend Deploy on Vercel
-Step A: Create Vercel Project
-
-Go to Vercel
-
-Import your GitHub repo
-
-Root directory: frontend
-
-Step B: Add Environment Variable
-
-In Vercel → Settings → Environment Variables:
-
-Add:
-
-VITE_API_BASE = your backend Render URL + /api
-
-Example:
-
-https://your-backend.onrender.com/api
-
-Step C: Update frontend api.js to use env
-
-In frontend/src/api.js use:
-
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:4000/api";
-
-
-Then deploy.
-
-Frontend will be live like:
-
-https://your-frontend.vercel.app
-
-✅ Final Fix: Update Render CORS_ORIGIN
-
-Once Vercel gives your final frontend URL, set backend env:
-
-CORS_ORIGIN=https://your-frontend.vercel.app
+```env
+CORS_ORIGIN=https://<YOUR_VERCEL_FRONTEND_URL>
+```
 
 Redeploy backend.
 
-✅ 4) Demo Recording Script (Simple + Perfect)
+---
 
-Use this as your speaking script for recording (2–4 minutes):
+# Live Demo
 
-🎥 Demo Script
+Frontend:
 
-1) Intro
-“Hi, this is my Chatbot Platform project.
-It supports authentication, multiple users, multiple projects/agents, prompts, chats and messages stored in Postgres, and AI responses using OpenRouter.”
+* [https://chatbot-platform-phi.vercel.app](https://chatbot-platform-phi.vercel.app)
 
-2) Show Login/Register
+Backend:
 
-Open frontend URL
+* [https://chatbot-platform-cxq0.onrender.com](https://chatbot-platform-cxq0.onrender.com)
 
-Register new user
+---
 
-Login using email/password
+# Notes
 
-Say:
-“This uses JWT authentication and all protected routes require a token.”
+* Do NOT commit `.env` files to GitHub.
+* JWT is required for protected endpoints.
+* Messages are stored in Postgres and AI replies come from OpenRouter.
 
-3) Show Dashboard
+---
 
-Show Projects sidebar
+## License
 
-Click “+ Project”
+MIT
 
-Create a project (agent)
+---
 
-Say:
-“Each user can create multiple projects, and each project is isolated per user.”
-
-4) Create Chat
-
-Click “+ Chat”
-
-Create a chat
-
-Say:
-“Chats belong to a project, and messages are stored in the database.”
-
-5) Send Messages
-Send:
-
-“Hi”
-
-“Explain JWT in 2 lines”
-
-“What is today’s date?”
-
-Say:
-“The assistant response is generated using OpenRouter LLM API, and conversation context is maintained.”
-
-6) Show Postman
-
-Show login API
-
-Show token in Authorization header
-
-Show GET projects and chat messages
-
-Say:
-“This backend supports API testing and can be extended easily.”
-
-7) End
-“Thank you! This is the minimal working demo, and it’s ready for further features like file uploads, analytics, and integrations.”
