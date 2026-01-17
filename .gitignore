@@ -1,0 +1,12 @@
+# node
+node_modules
+dist
+.vite
+.env
+
+# logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
