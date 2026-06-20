@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw, Pin, Mic, Volume2, VolumeX, Paperclip, X } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw, Pin, Mic, Volume2, VolumeX, Paperclip, X, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const PROMPT_TEMPLATES = [
@@ -54,6 +54,10 @@ export default function Dashboard() {
   const [speakingMsgId, setSpeakingMsgId] = useState("");
   const [selectedAttachments, setSelectedAttachments] = useState([]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profileAvatar, setProfileAvatar] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const [activeModal, setActiveModal] = useState(null);
   const [modalInput, setModalInput] = useState("");
@@ -539,6 +543,48 @@ export default function Dashboard() {
     setSelectedAttachments((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   }
 
+  async function handleAvatarUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      addToast("Profile picture must be under 5MB", "warning");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const data = await api.uploadFile(file);
+      setProfileAvatar(data.url);
+      addToast("Avatar uploaded successfully!", "success");
+    } catch (err) {
+      addToast(err.message || "Failed to upload avatar", "error");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
+  async function handleSaveProfile(e) {
+    e.preventDefault();
+    const name = profileName.trim();
+    if (!name) {
+      addToast("Display name cannot be empty", "warning");
+      return;
+    }
+
+    try {
+      const data = await api.updateProfile({
+        name,
+        avatarUrl: profileAvatar || null,
+      });
+      setUser(data.user);
+      addToast("Profile updated successfully!", "success");
+      setIsProfileModalOpen(false);
+    } catch (err) {
+      addToast(err.message || "Failed to update profile", "error");
+    }
+  }
+
   async function loadPrompts(projectId) {
     if (!projectId) return;
     setLoadingPrompts(true);
@@ -618,7 +664,7 @@ export default function Dashboard() {
           <div style={styles.brandLogo}>🤖</div>
           <div>
             <div style={styles.brandTitle}>Chatbot Platform</div>
-            <div style={styles.brandSub}>{user ? user.email : "Loading..."}</div>
+            <div style={styles.brandSub}>AI Workspace</div>
           </div>
         </div>
 
@@ -764,7 +810,71 @@ export default function Dashboard() {
           )}
         </div>
 
-        <button style={styles.logoutBtn} onClick={logout}>
+        <div
+          className="sidebar-user-card elevated-3d-card btn-3d-interactive"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "10px 12px",
+            borderRadius: 14,
+            cursor: "pointer",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "var(--shadow-3d-sm)",
+            marginBottom: 8,
+            marginTop: "auto",
+          }}
+          onClick={() => {
+            setProfileName(user?.name || "");
+            setProfileAvatar(user?.avatarUrl || "");
+            setIsProfileModalOpen(true);
+          }}
+          title="Edit Profile Settings"
+        >
+          {user?.avatarUrl ? (
+            <img
+              src={user.avatarUrl.startsWith("http") ? user.avatarUrl : `${api.baseUrl}${user.avatarUrl}`}
+              alt="Avatar"
+              className="sidebar-user-avatar"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "1.5px solid rgba(255,255,255,0.15)",
+              }}
+            />
+          ) : (
+            <div
+              className="sidebar-user-avatar-fallback"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #3b82f6, #6d5efc)",
+                display: "grid",
+                placeItems: "center",
+                fontWeight: 700,
+                fontSize: 14,
+                color: "#fff",
+                border: "1.5px solid rgba(255,255,255,0.15)",
+              }}
+            >
+              {user?.name ? user.name.slice(0, 2).toUpperCase() : <User size={16} />}
+            </div>
+          )}
+          <div style={{ flex: 1, overflow: "hidden", textAlign: "left" }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: "#fff", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+              {user?.name || "User"}
+            </div>
+            <div style={{ fontSize: 10, opacity: 0.6, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+              {user?.email || ""}
+            </div>
+          </div>
+        </div>
+
+        <button style={{ ...styles.logoutBtn, marginTop: 0 }} onClick={logout}>
           <LogOut size={18} />
           Logout
         </button>
@@ -1237,6 +1347,106 @@ export default function Dashboard() {
                 Create
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isProfileModalOpen && (
+        <div className="modal-overlay-fade" style={styles.modalOverlay}>
+          <div className="modal-content-scale" style={{ ...styles.modalContent, maxWidth: 450 }}>
+            <h3 style={styles.modalTitle}>User Profile Settings</h3>
+            
+            <form onSubmit={handleSaveProfile} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Avatar Upload Preview */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <div style={{ position: "relative" }}>
+                  {profileAvatar ? (
+                    <img
+                      src={profileAvatar.startsWith("http") ? profileAvatar : `${api.baseUrl}${profileAvatar}`}
+                      alt="Profile Avatar Preview"
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "2px solid rgba(255,255,255,0.2)",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: "50%",
+                        background: "linear-gradient(135deg, #3b82f6, #6d5efc)",
+                        display: "grid",
+                        placeItems: "center",
+                        fontWeight: 700,
+                        fontSize: 28,
+                        color: "#fff",
+                        border: "2px solid rgba(255,255,255,0.2)",
+                      }}
+                    >
+                      {profileName ? profileName.slice(0, 2).toUpperCase() : <User size={36} />}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Upload button wrapper */}
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  style={{ display: "none" }}
+                  onChange={handleAvatarUpload}
+                  accept="image/*"
+                  disabled={uploadingAvatar}
+                />
+                <label
+                  htmlFor="avatar-upload"
+                  className="btn-3d-interactive"
+                  style={{
+                    cursor: uploadingAvatar ? "not-allowed" : "pointer",
+                    borderRadius: 10,
+                    padding: "6px 12px",
+                    fontSize: 12,
+                    background: "rgba(255,255,255,0.08)",
+                    borderBottom: "2px solid rgba(0, 0, 0, 0.35)",
+                    opacity: uploadingAvatar ? 0.6 : 1,
+                  }}
+                >
+                  {uploadingAvatar ? "Uploading..." : "Upload Photo"}
+                </label>
+              </div>
+
+              {/* Display name input */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, textAlign: "left" }}>
+                <label style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>Display Name</label>
+                <input
+                  style={styles.modalInput}
+                  placeholder="Enter display name"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={styles.modalActions}>
+                <button
+                  type="button"
+                  style={{ ...styles.modalBtn, ...styles.cancelBtn }}
+                  onClick={() => setIsProfileModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="action-btn-gradient"
+                  style={{ ...styles.modalBtn, ...styles.confirmBtn }}
+                >
+                  Save Settings
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -262,5 +262,10 @@ export const api = {
 
     return data;
   },
+  updateProfile: (payload) =>
+    request("/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
   baseUrl: API_BASE.replace("/api", ""),
 };

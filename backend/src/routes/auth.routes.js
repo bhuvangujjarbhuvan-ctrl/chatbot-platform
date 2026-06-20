@@ -66,7 +66,7 @@ router.post(
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl },
     });
   }),
 );
@@ -77,10 +77,34 @@ router.get(
   asyncHandler(async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: { id: true, name: true, email: true, avatarUrl: true, createdAt: true },
     });
 
     res.json({ user });
+  }),
+);
+
+router.patch(
+  "/me",
+  authGuard,
+  asyncHandler(async (req, res) => {
+    const schema = z.object({
+      name: z.string().min(2, "Name must be at least 2 characters").optional(),
+      avatarUrl: z.string().nullable().optional(),
+    });
+
+    const body = schema.parse(req.body);
+
+    const updated = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        name: body.name,
+        avatarUrl: body.avatarUrl,
+      },
+      select: { id: true, name: true, email: true, avatarUrl: true, createdAt: true },
+    });
+
+    res.json({ user: updated });
   }),
 );
 

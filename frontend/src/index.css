@@ -857,3 +857,23 @@ select option {
   opacity: 0.6;
   margin-top: 2px;
 }
+
+/* Sidebar User profile card styles */
+.sidebar-user-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-user-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.sidebar-user-avatar {
+  transition: transform 0.2s ease;
+}
+
+.sidebar-user-card:hover .sidebar-user-avatar {
+  transform: scale(1.05);
+}
