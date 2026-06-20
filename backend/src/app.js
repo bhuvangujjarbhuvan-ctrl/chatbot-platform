@@ -1,10 +1,16 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import promptRoutes from "./routes/prompt.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 import { errorHandler } from "./middleware/error.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -16,12 +22,16 @@ app.use(
   })
 );
 
+// Serve uploads statically
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 app.get("/health", (req, res) => res.json({ ok: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api", promptRoutes);
 app.use("/api", chatRoutes);
+app.use("/api", uploadRoutes);
 
 app.use(errorHandler);
 

@@ -234,4 +234,33 @@ export const api = {
 
   getPinnedMessages: (projectId) =>
     request(`/projects/${projectId}/pinned-messages`),
+
+  uploadFile: async (file) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${API_BASE}/upload`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    const text = await res.text();
+    let data = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (e) {
+      data = { raw: text };
+    }
+
+    if (!res.ok) {
+      throw new Error(data?.error || "Upload failed");
+    }
+
+    return data;
+  },
+  baseUrl: API_BASE.replace("/api", ""),
 };

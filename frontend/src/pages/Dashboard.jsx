@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw, Pin, Mic, Volume2, VolumeX } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw, Pin, Mic, Volume2, VolumeX, Paperclip, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const PROMPT_TEMPLATES = [
@@ -52,6 +52,8 @@ export default function Dashboard() {
   const [loadingPinned, setLoadingPinned] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [speakingMsgId, setSpeakingMsgId] = useState("");
+  const [selectedAttachments, setSelectedAttachments] = useState([]);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
 
   const [activeModal, setActiveModal] = useState(null);
   const [modalInput, setModalInput] = useState("");
@@ -285,9 +287,11 @@ export default function Dashboard() {
     }
 
     const text = input.trim();
-    if (!text) return;
+    if (!text && selectedAttachments.length === 0) return;
 
     setInput("");
+    const attachmentsToSend = [...selectedAttachments];
+    setSelectedAttachments([]);
     setSending(true);
 
     // 1) Add user message optimistically
@@ -296,6 +300,7 @@ export default function Dashboard() {
       chatId: selectedChatId,
       role: "user",
       content: text,
+      attachments: attachmentsToSend,
       createdAt: new Date().toISOString(),
     };
 
@@ -316,7 +321,7 @@ export default function Dashboard() {
     scrollToBottom();
 
     try {
-      await api.sendMessageStream(selectedChatId, { content: text }, {
+      await api.sendMessageStream(selectedChatId, { content: text, attachments: attachmentsToSend }, {
         onUserMessage: (userMsg) => {
           setMessages((prev) => prev.map((m) => (m.id === tempUserMsg.id ? userMsg : m)));
         },
@@ -503,6 +508,35 @@ export default function Dashboard() {
     };
 
     recognition.start();
+  }
+
+  async function handleFileSelect(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    setUploadingAttachment(true);
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) {
+          addToast(`File "${file.name}" exceeds 10MB limit`, "warning");
+          continue;
+        }
+        const data = await api.uploadFile(file);
+        uploaded.push(data);
+      }
+      setSelectedAttachments((prev) => [...prev, ...uploaded]);
+      addToast("File(s) uploaded successfully!", "success");
+    } catch (err) {
+      addToast(err.message || "Failed to upload file", "error");
+    } finally {
+      setUploadingAttachment(false);
+      e.target.value = "";
+    }
+  }
+
+  function removeAttachment(indexToRemove) {
+    setSelectedAttachments((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   }
 
   async function loadPrompts(projectId) {
@@ -1034,6 +1068,30 @@ export default function Dashboard() {
                           <ReactMarkdown components={{ pre: MarkdownPre }}>{m.content}</ReactMarkdown>
                         </div>
                       )}
+                      {m.attachments && m.attachments.length > 0 && (
+                        <div className="message-attachments-container">
+                          {m.attachments.map((att, index) => {
+                            const fullUrl = att.url.startsWith("http") ? att.url : `${api.baseUrl}${att.url}`;
+                            if (att.mimeType.startsWith("image/")) {
+                              return (
+                                <a key={index} href={fullUrl} target="_blank" rel="noopener noreferrer" className="message-attachment-image-link">
+                                  <img src={fullUrl} alt={att.name} className="message-attachment-image elevated-3d-card" />
+                                </a>
+                              );
+                            } else {
+                              return (
+                                <a key={index} href={fullUrl} download={att.name} className="message-attachment-card elevated-3d-card btn-3d-interactive">
+                                  <span className="attachment-icon">📎</span>
+                                  <div className="attachment-info">
+                                    <span className="attachment-name">{att.name}</span>
+                                    <span className="attachment-size">({(att.size / 1024).toFixed(1)} KB)</span>
+                                  </div>
+                                </a>
+                              );
+                            }
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
@@ -1051,7 +1109,58 @@ export default function Dashboard() {
               <div ref={bottomRef} />
             </div>
 
+            {(selectedAttachments.length > 0 || uploadingAttachment) && (
+              <div className="attachments-preview-strip">
+                {selectedAttachments.map((att, idx) => (
+                  <div key={idx} className="attachment-preview-thumbnail elevated-3d-card">
+                    {att.mimeType.startsWith("image/") ? (
+                      <img src={att.url.startsWith("http") ? att.url : `${api.baseUrl}${att.url}`} alt={att.name} className="attachment-preview-image" />
+                    ) : (
+                      <div className="attachment-preview-fileicon">📎</div>
+                    )}
+                    <span className="attachment-preview-name">{att.name}</span>
+                    <button type="button" className="attachment-preview-remove" onClick={() => removeAttachment(idx)}>
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+                {uploadingAttachment && (
+                  <div className="attachment-preview-thumbnail uploading elevated-3d-card" style={{ opacity: 0.7 }}>
+                    <span className="attachment-preview-name">Uploading...</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div style={styles.inputBar}>
+              <input
+                type="file"
+                id="file-upload"
+                multiple
+                style={{ display: "none" }}
+                onChange={handleFileSelect}
+                disabled={uploadingAttachment}
+              />
+              <label
+                htmlFor="file-upload"
+                className="btn-3d-interactive"
+                style={{
+                  cursor: uploadingAttachment ? "not-allowed" : "pointer",
+                  borderRadius: 14,
+                  padding: "12px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  background: "rgba(255,255,255,0.08)",
+                  borderBottom: "3px solid rgba(0, 0, 0, 0.35)",
+                  opacity: uploadingAttachment ? 0.6 : 1,
+                }}
+                title="Attach files"
+              >
+                <Paperclip size={18} />
+              </label>
+
               <input
                 style={styles.input}
                 placeholder="Type a message..."

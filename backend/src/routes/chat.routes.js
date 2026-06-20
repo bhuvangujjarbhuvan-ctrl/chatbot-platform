@@ -73,6 +73,7 @@ router.get(
 
     const messages = await prisma.message.findMany({
       where: { chatId: chat.id },
+      include: { attachments: true },
       orderBy: { createdAt: "asc" },
     });
 
@@ -86,6 +87,16 @@ router.post(
   asyncHandler(async (req, res) => {
     const schema = z.object({
       content: z.string().min(1, "Message content is required"),
+      attachments: z
+        .array(
+          z.object({
+            url: z.string(),
+            name: z.string(),
+            mimeType: z.string(),
+            size: z.number().int(),
+          })
+        )
+        .optional(),
     });
 
     const body = schema.parse(req.body);
@@ -105,6 +116,14 @@ router.post(
         chatId: chat.id,
         role: "user",
         content: body.content,
+        attachments: body.attachments
+          ? {
+              create: body.attachments,
+            }
+          : undefined,
+      },
+      include: {
+        attachments: true,
       },
     });
 
@@ -423,6 +442,7 @@ router.get(
       },
       include: {
         chat: true,
+        attachments: true,
       },
       orderBy: { createdAt: "desc" },
     });
