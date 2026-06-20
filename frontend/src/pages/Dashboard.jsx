@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw, Pin } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const PROMPT_TEMPLATES = [
@@ -48,6 +48,8 @@ export default function Dashboard() {
   const [newPromptIsDefault, setNewPromptIsDefault] = useState(true);
   const [loadingPrompts, setLoadingPrompts] = useState(false);
   const [savingPrompt, setSavingPrompt] = useState(false);
+  const [pinnedMessages, setPinnedMessages] = useState([]);
+  const [loadingPinned, setLoadingPinned] = useState(false);
 
   const [activeModal, setActiveModal] = useState(null);
   const [modalInput, setModalInput] = useState("");
@@ -398,6 +400,38 @@ export default function Dashboard() {
     }
   }
 
+  async function loadPinnedMessages(projectId) {
+    if (!projectId) return;
+    setLoadingPinned(true);
+    try {
+      const data = await api.getPinnedMessages(projectId);
+      setPinnedMessages(data.pinnedMessages || []);
+    } catch (e) {
+      console.error("Failed to load pinned messages", e);
+    } finally {
+      setLoadingPinned(false);
+    }
+  }
+
+  async function handleTogglePin(chatId, messageId) {
+    try {
+      const data = await api.toggleMessagePin(chatId, messageId);
+      const isNowPinned = data.message.isPinned;
+      
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, isPinned: isNowPinned } : m))
+      );
+
+      if (selectedProjectId) {
+        loadPinnedMessages(selectedProjectId);
+      }
+
+      addToast(isNowPinned ? "Message pinned to bookmarks!" : "Message removed from bookmarks!", "success");
+    } catch (err) {
+      addToast(err.message || "Failed to toggle pin state", "error");
+    }
+  }
+
   async function loadPrompts(projectId) {
     if (!projectId) return;
     setLoadingPrompts(true);
@@ -459,6 +493,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (selectedProjectId && showSettings) {
       loadPrompts(selectedProjectId);
+      loadPinnedMessages(selectedProjectId);
     }
   }, [selectedProjectId, showSettings]);
 
@@ -803,6 +838,51 @@ export default function Dashboard() {
                 ))
               )}
             </div>
+
+            <hr style={{ border: "0.5px solid rgba(255,255,255,0.08)", margin: "20px 0" }} />
+
+            <h3 style={styles.settingsHeading}>Pinned Bookmarks</h3>
+            <p style={styles.settingsSub}>
+              View and navigate to pinned responses from your conversations in this project.
+            </p>
+
+            <div style={styles.promptsList}>
+              {loadingPinned ? (
+                <div style={styles.muted}>Loading pinned bookmarks...</div>
+              ) : pinnedMessages.length === 0 ? (
+                <div style={styles.muted}>No pinned bookmarks yet. Pin messages inside your chats to save them here.</div>
+              ) : (
+                pinnedMessages.map((pm) => (
+                  <div
+                    key={pm.id}
+                    className="elevated-3d-card preset-card-hover btn-3d-interactive"
+                    style={{
+                      ...styles.promptCard,
+                      cursor: "pointer",
+                      padding: 16,
+                      background: "rgba(255,255,255,0.02)",
+                    }}
+                    onClick={() => {
+                      setSelectedChatId(pm.chatId);
+                      setShowSettings(false);
+                    }}
+                    title={`Click to open chat: "${pm.chat?.title || 'Chat History'}"`}
+                  >
+                    <div style={styles.promptHeader}>
+                      <span style={{ ...styles.promptTitle, textTransform: "capitalize", color: "#3b82f6" }}>
+                        📌 {pm.role === "user" ? "You" : "AI"} in "{pm.chat?.title || 'Chat'}"
+                      </span>
+                      <span style={{ fontSize: 11, opacity: 0.6 }}>
+                        {new Date(pm.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div style={{ ...styles.promptContent, background: "rgba(0,0,0,0.2)", fontSize: 13 }}>
+                      {pm.content.length > 250 ? `${pm.content.slice(0, 250)}...` : pm.content}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         ) : (
           <>
@@ -833,15 +913,35 @@ export default function Dashboard() {
                     >
                       <div style={styles.msgRole}>
                         <span>{m.role === "user" ? "You" : "AI"}</span>
-                        {m.role === "assistant" && m.id !== "temp-ai-message" && (
-                          <button
-                            className="regenerate-btn"
-                            onClick={() => handleRegenerate(m.id)}
-                            disabled={sending}
-                            title="Regenerate response"
-                          >
-                            <RefreshCw size={12} className={sending ? "animate-spin" : ""} />
-                          </button>
+                        {m.id !== "temp-ai-message" && (
+                          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                            <button
+                              className="regenerate-btn"
+                              style={{
+                                color: m.isPinned ? "#eab308" : "rgba(255,255,255,0.45)",
+                              }}
+                              onClick={() => handleTogglePin(m.chatId, m.id)}
+                              title={m.isPinned ? "Unpin message" : "Pin message"}
+                            >
+                              <Pin
+                                size={12}
+                                style={{
+                                  transform: m.isPinned ? "rotate(45deg)" : "none",
+                                  fill: m.isPinned ? "#eab308" : "none",
+                                }}
+                              />
+                            </button>
+                            {m.role === "assistant" && (
+                              <button
+                                className="regenerate-btn"
+                                onClick={() => handleRegenerate(m.id)}
+                                disabled={sending}
+                                title="Regenerate response"
+                              >
+                                <RefreshCw size={12} className={sending ? "animate-spin" : ""} />
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                       {m.role === "user" ? (

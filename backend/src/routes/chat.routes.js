@@ -371,6 +371,66 @@ Rules:
   }),
 );
 
+// ✅ Toggle message pin status
+router.patch(
+  "/chats/:chatId/messages/:messageId/pin",
+  asyncHandler(async (req, res) => {
+    const { chatId, messageId } = req.params;
+
+    const chat = await prisma.chat.findFirst({
+      where: { id: chatId, project: { userId: req.user.id } },
+    });
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    const message = await prisma.message.findFirst({
+      where: { id: messageId, chatId },
+    });
+
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    const updated = await prisma.message.update({
+      where: { id: messageId },
+      data: { isPinned: !message.isPinned },
+    });
+
+    res.json({ message: updated });
+  }),
+);
+
+// ✅ Get all pinned messages of a project
+router.get(
+  "/projects/:projectId/pinned-messages",
+  asyncHandler(async (req, res) => {
+    const { projectId } = req.params;
+
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, userId: req.user.id },
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const pinnedMessages = await prisma.message.findMany({
+      where: {
+        isPinned: true,
+        chat: { projectId },
+      },
+      include: {
+        chat: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json({ pinnedMessages });
+  }),
+);
+
 router.delete(
   "/chats/:chatId",
   asyncHandler(async (req, res) => {

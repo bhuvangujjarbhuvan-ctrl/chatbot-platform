@@ -226,4 +226,12 @@ export const api = {
       if (onError) onError(err);
     }
   },
+
+  toggleMessagePin: (chatId, messageId) =>
+    request(`/chats/${chatId}/messages/${messageId}/pin`, {
+      method: "PATCH",
+    }),
+
+  getPinnedMessages: (projectId) =>
+    request(`/projects/${projectId}/pinned-messages`),
 };
