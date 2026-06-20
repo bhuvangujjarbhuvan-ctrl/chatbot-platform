@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw, Pin } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw, Pin, Mic, Volume2, VolumeX } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const PROMPT_TEMPLATES = [
@@ -50,6 +50,8 @@ export default function Dashboard() {
   const [savingPrompt, setSavingPrompt] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState([]);
   const [loadingPinned, setLoadingPinned] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState("");
 
   const [activeModal, setActiveModal] = useState(null);
   const [modalInput, setModalInput] = useState("");
@@ -430,6 +432,77 @@ export default function Dashboard() {
     } catch (err) {
       addToast(err.message || "Failed to toggle pin state", "error");
     }
+  }
+
+  function handleToggleSpeak(messageId, text) {
+    if (!window.speechSynthesis) {
+      addToast("Your browser does not support text-to-speech.", "warning");
+      return;
+    }
+
+    if (speakingMsgId === messageId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId("");
+      addToast("Speech stopped", "info");
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const cleanText = text.replace(/[*#`_\-]/g, "");
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.onstart = () => {
+      setSpeakingMsgId(messageId);
+    };
+    utterance.onend = () => {
+      setSpeakingMsgId("");
+    };
+    utterance.onerror = () => {
+      setSpeakingMsgId("");
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function handleVoiceTyping() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      addToast("Your browser does not support speech recognition.", "warning");
+      return;
+    }
+
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      addToast("Listening... Speak now!", "info");
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev) => (prev ? prev + " " + transcript : transcript));
+      addToast("Voice input captured!", "success");
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+      addToast(`Voice typing failed: ${event.error}`, "error");
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
   }
 
   async function loadPrompts(projectId) {
@@ -931,6 +1004,16 @@ export default function Dashboard() {
                                 }}
                               />
                             </button>
+                            <button
+                              className="regenerate-btn"
+                              style={{
+                                color: speakingMsgId === m.id ? "#3b82f6" : "rgba(255,255,255,0.45)",
+                              }}
+                              onClick={() => handleToggleSpeak(m.id, m.content)}
+                              title={speakingMsgId === m.id ? "Stop reading" : "Read message out loud"}
+                            >
+                              {speakingMsgId === m.id ? <VolumeX size={12} /> : <Volume2 size={12} />}
+                            </button>
                             {m.role === "assistant" && (
                               <button
                                 className="regenerate-btn"
@@ -978,6 +1061,29 @@ export default function Dashboard() {
                   if (e.key === "Enter") handleSend();
                 }}
               />
+              <button
+                className={`btn-3d-interactive ${isListening ? "mic-listening-pulse" : ""}`}
+                style={{
+                  border: "none",
+                  cursor: "pointer",
+                  borderRadius: 14,
+                  padding: "12px 14px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  background: isListening
+                    ? "linear-gradient(135deg, #ef4444, #b91c1c)"
+                    : "rgba(255,255,255,0.08)",
+                  borderBottom: isListening
+                    ? "3px solid #7f1d1d"
+                    : "3px solid rgba(0, 0, 0, 0.35)",
+                }}
+                onClick={handleVoiceTyping}
+                title={isListening ? "Stop listening" : "Voice typing"}
+              >
+                <Mic size={18} />
+              </button>
               <button className="action-btn-gradient" style={styles.sendBtn} onClick={handleSend} disabled={sending}>
                 <Send size={18} />
                 Send
