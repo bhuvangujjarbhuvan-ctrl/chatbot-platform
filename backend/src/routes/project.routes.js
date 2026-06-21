@@ -74,6 +74,8 @@ router.patch(
       name: z.string().min(2).optional(),
       description: z.string().optional(),
       modelName: z.string().nullable().optional(),
+      temperature: z.number().min(0.0).max(2.0).optional(),
+      maxTokens: z.number().int().min(10).max(4000).optional(),
     });
 
     const body = schema.parse(req.body);
@@ -84,6 +86,8 @@ router.patch(
         name: body.name !== undefined ? body.name : undefined,
         description: body.description !== undefined ? body.description : undefined,
         modelName: body.modelName !== undefined ? body.modelName : undefined,
+        temperature: body.temperature !== undefined ? body.temperature : undefined,
+        maxTokens: body.maxTokens !== undefined ? body.maxTokens : undefined,
       },
     });
 

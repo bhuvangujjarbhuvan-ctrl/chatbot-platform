@@ -1,4 +1,4 @@
-export async function streamAssistantReply({ systemText, messages, model, onChunk, onEnd }) {
+export async function streamAssistantReply({ systemText, messages, model, temperature, maxTokens, onChunk, onEnd }) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   const modelToUse = model || process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
   const baseUrl = process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
@@ -13,8 +13,8 @@ export async function streamAssistantReply({ systemText, messages, model, onChun
       ...(systemText ? [{ role: "system", content: systemText }] : []),
       ...(messages || []),
     ],
-    temperature: 0.2,
-    max_tokens: 300,
+    temperature: typeof temperature === "number" ? temperature : 0.7,
+    max_tokens: typeof maxTokens === "number" ? maxTokens : 300,
     stream: true,
   };
 

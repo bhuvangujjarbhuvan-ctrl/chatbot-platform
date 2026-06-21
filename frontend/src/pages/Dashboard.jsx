@@ -58,6 +58,9 @@ export default function Dashboard() {
   const [profileName, setProfileName] = useState("");
   const [profileAvatar, setProfileAvatar] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(300);
 
   const [activeModal, setActiveModal] = useState(null);
   const [modalInput, setModalInput] = useState("");
@@ -644,6 +647,13 @@ export default function Dashboard() {
   }, [selectedProjectId]);
 
   useEffect(() => {
+    if (selectedProject) {
+      setTemperature(selectedProject.temperature ?? 0.7);
+      setMaxTokens(selectedProject.maxTokens ?? 300);
+    }
+  }, [selectedProjectId, selectedProject]);
+
+  useEffect(() => {
     if (selectedProjectId && showSettings) {
       loadPrompts(selectedProjectId);
       loadPinnedMessages(selectedProjectId);
@@ -971,6 +981,106 @@ export default function Dashboard() {
                 <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Anthropic)</option>
                 <option value="meta-llama/llama-3-8b-instruct">Llama 3.1 8B (Meta)</option>
               </select>
+
+              <div style={{ marginTop: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <h4 style={{ ...styles.formSectionTitle, margin: 0 }}>Temperature ({temperature.toFixed(1)})</h4>
+                  <span style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    padding: "3px 8px",
+                    borderRadius: 8,
+                    background: temperature < 0.5 ? "rgba(34, 197, 94, 0.2)" : temperature < 1.1 ? "rgba(59, 130, 246, 0.2)" : "rgba(249, 115, 22, 0.2)",
+                    color: temperature < 0.5 ? "#22c55e" : temperature < 1.1 ? "#3b82f6" : "#f97316",
+                  }}>
+                    {temperature < 0.5 ? "Precise" : temperature < 1.1 ? "Balanced" : "Creative"}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.0"
+                  max="2.0"
+                  step="0.1"
+                  style={{ width: "100%", accentColor: "#3b82f6", cursor: "pointer" }}
+                  value={temperature}
+                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                  onMouseUp={async (e) => {
+                    const val = parseFloat(e.target.value);
+                    try {
+                      await api.updateProject(selectedProjectId, { temperature: val });
+                      addToast("Temperature setting updated!", "success");
+                      await loadProjects();
+                    } catch (err) {
+                      addToast(err.message || "Failed to update temperature", "error");
+                    }
+                  }}
+                />
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, opacity: 0.6, marginTop: 4 }}>
+                  <span>0.0 (Precise)</span>
+                  <span>1.0 (Balanced)</span>
+                  <span>2.0 (Creative)</span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <h4 style={{ ...styles.formSectionTitle, margin: 0 }}>Max Tokens</h4>
+                  <span style={{ fontSize: 12, opacity: 0.6 }}>50 - 4000 tokens</span>
+                </div>
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                  <input
+                    type="range"
+                    min="50"
+                    max="4000"
+                    step="50"
+                    style={{ flex: 1, accentColor: "#3b82f6", cursor: "pointer" }}
+                    value={maxTokens}
+                    onChange={(e) => setMaxTokens(parseInt(e.target.value, 10))}
+                    onMouseUp={async (e) => {
+                      const val = parseInt(e.target.value, 10);
+                      try {
+                        await api.updateProject(selectedProjectId, { maxTokens: val });
+                        addToast("Max tokens updated!", "success");
+                        await loadProjects();
+                      } catch (err) {
+                        addToast(err.message || "Failed to update max tokens", "error");
+                      }
+                    }}
+                  />
+                  <input
+                    type="number"
+                    min="50"
+                    max="4000"
+                    style={{
+                      ...styles.settingsInput,
+                      width: 85,
+                      textAlign: "center",
+                      borderRadius: 10,
+                      padding: "6px 8px"
+                    }}
+                    value={maxTokens}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setMaxTokens(isNaN(val) ? "" : val);
+                    }}
+                    onBlur={async (e) => {
+                      const val = parseInt(e.target.value, 10);
+                      if (isNaN(val) || val < 10 || val > 4000) {
+                        addToast("Max tokens must be between 10 and 4000", "warning");
+                        setMaxTokens(selectedProject?.maxTokens ?? 300);
+                        return;
+                      }
+                      try {
+                        await api.updateProject(selectedProjectId, { maxTokens: val });
+                        addToast("Max tokens updated!", "success");
+                        await loadProjects();
+                      } catch (err) {
+                        addToast(err.message || "Failed to update max tokens", "error");
+                      }
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
             <hr style={{ border: "0.5px solid rgba(255,255,255,0.08)", margin: "10px 0" }} />

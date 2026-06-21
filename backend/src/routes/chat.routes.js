@@ -144,7 +144,7 @@ router.post(
     // Get project model setting
     const project = await prisma.project.findUnique({
       where: { id: chat.projectId },
-      select: { modelName: true },
+      select: { modelName: true, temperature: true, maxTokens: true },
     });
 
     // 4) Get last messages for context (latest 20)
@@ -204,6 +204,8 @@ Rules:
         systemText,
         messages: llmMessages,
         model: project?.modelName,
+        temperature: project?.temperature,
+        maxTokens: project?.maxTokens,
         onChunk: (chunk) => {
           res.write(`event: chunk\ndata: ${JSON.stringify({ text: chunk })}\n\n`);
         },
@@ -303,7 +305,7 @@ router.post(
     // Get project model setting
     const project = await prisma.project.findUnique({
       where: { id: chat.projectId },
-      select: { modelName: true },
+      select: { modelName: true, temperature: true, maxTokens: true },
     });
 
     // 4) Get last messages for context (latest 20)
@@ -367,6 +369,8 @@ Rules:
         systemText,
         messages: llmMessages,
         model: project?.modelName,
+        temperature: project?.temperature,
+        maxTokens: project?.maxTokens,
         onChunk: (chunk) => {
           res.write(`event: chunk\ndata: ${JSON.stringify({ text: chunk })}\n\n`);
         },
