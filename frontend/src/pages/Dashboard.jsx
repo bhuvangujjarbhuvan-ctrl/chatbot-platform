@@ -578,7 +578,7 @@ export default function Dashboard() {
                         <div style={styles.msgText}>{m.content}</div>
                       ) : (
                         <div style={styles.msgText} className="markdown-content">
-                          <ReactMarkdown>{m.content}</ReactMarkdown>
+                          <ReactMarkdown components={{ pre: MarkdownPre }}>{m.content}</ReactMarkdown>
                         </div>
                       )}
                     </div>
@@ -1026,3 +1026,32 @@ const styles = {
     transition: "all 0.2s ease",
   },
 };
+
+const MarkdownPre = ({ children, ...props }) => {
+  const [copied, setCopied] = useState(false);
+  const codeRef = useRef(null);
+
+  const handleCopy = async () => {
+    if (codeRef.current) {
+      const codeText = codeRef.current.innerText || "";
+      await navigator.clipboard.writeText(codeText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="code-block-container">
+      <button
+        className={`copy-code-btn ${copied ? 'copied' : ''}`}
+        onClick={handleCopy}
+      >
+        {copied ? 'Copied!' : 'Copy'}
+      </button>
+      <pre {...props} ref={codeRef}>
+        {children}
+      </pre>
+    </div>
+  );
+};
+
