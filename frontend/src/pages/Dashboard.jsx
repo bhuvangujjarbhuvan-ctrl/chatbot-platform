@@ -160,8 +160,9 @@ export default function Dashboard() {
     if (!text) return;
 
     setInput("");
+    setSending(true);
 
-    // optimistic UI
+    // 1) Add user message optimistically
     const tempUserMsg = {
       id: crypto.randomUUID(),
       chatId: selectedChatId,
@@ -173,18 +174,48 @@ export default function Dashboard() {
     setMessages((prev) => [...prev, tempUserMsg]);
     scrollToBottom();
 
-    setSending(true);
-    try {
-      const data = await api.sendMessage(selectedChatId, { content: text });
+    // 2) Add placeholders for streaming assistant message
+    const tempAiId = "temp-ai-message";
+    const tempAiMsg = {
+      id: tempAiId,
+      chatId: selectedChatId,
+      role: "assistant",
+      content: "",
+      createdAt: new Date().toISOString(),
+    };
 
-      // add assistant message
-      if (data?.assistantMessage) {
-        setMessages((prev) => [...prev, data.assistantMessage]);
-      }
-      scrollToBottom();
+    setMessages((prev) => [...prev, tempAiMsg]);
+    scrollToBottom();
+
+    try {
+      await api.sendMessageStream(selectedChatId, { content: text }, {
+        onUserMessage: (userMsg) => {
+          setMessages((prev) => prev.map((m) => (m.id === tempUserMsg.id ? userMsg : m)));
+        },
+        onChunk: (chunk) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === tempAiId ? { ...m, content: m.content + chunk } : m
+            )
+          );
+          scrollToBottom();
+        },
+        onDone: (assistantMsg) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === tempAiId ? assistantMsg : m))
+          );
+          setSending(false);
+          scrollToBottom();
+        },
+        onError: (err) => {
+          addToast(err.message || "Stream failed", "error");
+          setMessages((prev) => prev.filter((m) => m.id !== tempAiId));
+          setSending(false);
+        }
+      });
     } catch (e) {
       addToast(e.message, "error");
-    } finally {
+      setMessages((prev) => prev.filter((m) => m.id !== tempAiId));
       setSending(false);
     }
   }
@@ -434,7 +465,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                messages.map((m) => (
+                messages.filter((m) => m.content !== "").map((m) => (
                   <div
                     key={m.id}
                     style={{
@@ -455,7 +486,7 @@ export default function Dashboard() {
                 ))
               )}
 
-              {sending && (
+              {sending && (!messages.find(m => m.id === "temp-ai-message") || messages.find(m => m.id === "temp-ai-message")?.content === "") && (
                 <div style={{ ...styles.msgRow, justifyContent: "flex-start" }}>
                   <div style={{ ...styles.msgBubble, ...styles.aiBubble, opacity: 0.7 }}>
                     <div style={styles.msgRole}>AI</div>

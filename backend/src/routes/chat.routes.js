@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "../config/prisma.js";
 import { authGuard } from "../middleware/auth.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { generateAssistantReply } from "../services/openrouter.service.js";
+import { streamAssistantReply } from "../services/stream.js";
 
 const router = express.Router();
 router.use(authGuard);
@@ -79,7 +79,7 @@ router.get(
   }),
 );
 
-// ✅ Send message + get AI reply
+// ✅ Send message + get AI reply (Streaming SSE version)
 router.post(
   "/chats/:chatId/messages",
   asyncHandler(async (req, res) => {
@@ -107,6 +107,14 @@ router.post(
       },
     });
 
+    // Setup headers for Server-Sent Events (SSE)
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    // Write the user message details to client first
+    res.write(`event: userMessage\ndata: ${JSON.stringify(userMsg)}\n\n`);
+
     // 3) Get default prompt for this project
     const defaultPrompt = await prisma.prompt.findFirst({
       where: { projectId: chat.projectId, isDefault: true },
@@ -129,14 +137,14 @@ router.post(
         content: m.content,
       }));
 
-    // 5) Call OpenRouter
+    // 5) Call OpenRouter in stream mode
     const today = new Date().toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "long",
       year: "numeric",
     });
 
-const systemText = `
+    const systemText = `
 ${defaultPrompt?.content || "You are a helpful assistant."}
 
 Rules:
@@ -146,25 +154,30 @@ Rules:
 4) Keep it short.
 `.trim();
 
-
-    const assistantText = await generateAssistantReply({
-      systemText,
-      messages: llmMessages,
-    });
-
-    // 6) Save assistant message
-    const assistantMsg = await prisma.message.create({
-      data: {
-        chatId: chat.id,
-        role: "assistant",
-        content: assistantText,
-      },
-    });
-
-    return res.status(201).json({
-      userMessage: userMsg,
-      assistantMessage: assistantMsg,
-    });
+    try {
+      await streamAssistantReply({
+        systemText,
+        messages: llmMessages,
+        onChunk: (chunk) => {
+          res.write(`event: chunk\ndata: ${JSON.stringify({ text: chunk })}\n\n`);
+        },
+        onEnd: async (fullContent) => {
+          // 6) Save assistant message in DB when complete
+          const assistantMsg = await prisma.message.create({
+            data: {
+              chatId: chat.id,
+              role: "assistant",
+              content: fullContent,
+            },
+          });
+          res.write(`event: done\ndata: ${JSON.stringify(assistantMsg)}\n\n`);
+          res.end();
+        },
+      });
+    } catch (e) {
+      res.write(`event: error\ndata: ${JSON.stringify({ error: e.message })}\n\n`);
+      res.end();
+    }
   }),
 );
 

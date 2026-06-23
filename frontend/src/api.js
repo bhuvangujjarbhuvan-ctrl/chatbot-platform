@@ -83,4 +83,66 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+
+  sendMessageStream: async (chatId, payload, { onUserMessage, onChunk, onDone, onError }) => {
+    const token = getToken();
+    try {
+      const response = await fetch(`${API_BASE}/chats/${chatId}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let parsed = {};
+        try { parsed = JSON.parse(errorText); } catch(e) {}
+        throw new Error(parsed.error || "Request failed");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let currentEvent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+
+          if (trimmed.startsWith("event: ")) {
+            currentEvent = trimmed.slice(7).trim();
+          } else if (trimmed.startsWith("data: ")) {
+            const dataRaw = trimmed.slice(6).trim();
+            try {
+              const parsedData = JSON.parse(dataRaw);
+              if (currentEvent === "userMessage" && onUserMessage) {
+                onUserMessage(parsedData);
+              } else if (currentEvent === "chunk" && onChunk) {
+                onChunk(parsedData.text);
+              } else if (currentEvent === "done" && onDone) {
+                onDone(parsedData);
+              } else if (currentEvent === "error" && onError) {
+                onError(new Error(parsedData.error || "Stream error"));
+              }
+            } catch (e) {
+              console.error("Error parsing stream event data", e);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      if (onError) onError(err);
+    }
+  },
 };
