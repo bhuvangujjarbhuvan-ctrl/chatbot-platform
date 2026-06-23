@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -20,7 +21,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={token ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/login" />} />
+        <Route path="/" element={token ? <Dashboard onLogout={handleLogout} /> : <Landing />} />
         <Route path="/login" element={token ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
         <Route path="/register" element={token ? <Navigate to="/" /> : <Register />} />
       </Routes>
