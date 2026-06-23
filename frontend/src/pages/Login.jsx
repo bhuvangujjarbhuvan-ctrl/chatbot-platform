@@ -59,6 +59,7 @@ export default function Login() {
         />
 
         {/* 🔴 IMPORTANT */}
+        <hr style={styles.divider} />
         <button type="submit" style={styles.button}>
           Login
         </button>
@@ -118,5 +119,10 @@ const styles = {
     textAlign: "center",
     fontSize: 13,
     opacity: 0.8,
+  },
+  divider: {
+    border: "none",
+    borderTop: "1px solid rgba(255, 255, 255, 0.12)",
+    margin: "8px 0",
   },
 };
