@@ -4,6 +4,7 @@ import { prisma } from "../config/prisma.js";
 import { authGuard } from "../middleware/auth.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { streamAssistantReply } from "../services/stream.js";
+import { searchWeb } from "../utils/search.js";
 
 const router = express.Router();
 router.use(authGuard);
@@ -150,8 +151,27 @@ router.post(
       year: "numeric",
     });
 
+    const searchKeywords = ["news", "today", "weather", "latest", "stock", "price", "live", "score", "recent", "current", "who is", "what is the status of"];
+    const needsSearch = searchKeywords.some(keyword => body.content.toLowerCase().includes(keyword));
+
+    let searchResults = "";
+    if (needsSearch) {
+      try {
+        searchResults = await searchWeb(body.content);
+      } catch (err) {
+        console.error("Web search call failed:", err);
+      }
+    }
+
     const systemText = `
 ${defaultPrompt?.content || "You are a helpful assistant."}
+
+${needsSearch && searchResults ? `[Live Web Search Context]
+Query: ${body.content}
+Results:
+${searchResults}
+
+Use the above real-time context to answer the user's question accurately. Cite the info if possible.` : ""}
 
 Rules:
 1) If user says only "hi" or "hello", reply normally with a greeting.
