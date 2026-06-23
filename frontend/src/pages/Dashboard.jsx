@@ -325,7 +325,7 @@ export default function Dashboard() {
   return (
     <div style={styles.page}>
       {/* Sidebar */}
-      <aside style={styles.sidebar}>
+      <aside className="glass-sidebar" style={styles.sidebar}>
         <div style={styles.brand}>
           <div style={styles.brandLogo}>🤖</div>
           <div>
@@ -351,6 +351,7 @@ export default function Dashboard() {
               <div
                 key={p.id}
                 onClick={() => setSelectedProjectId(p.id)}
+                className={`sidebar-list-item ${p.id === selectedProjectId ? 'sidebar-list-item-active' : ''}`}
                 style={{
                   ...styles.listItem,
                   ...(p.id === selectedProjectId ? styles.listItemActive : {}),
@@ -365,6 +366,7 @@ export default function Dashboard() {
                   <div style={{ ...styles.smallMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.description || "No description"}</div>
                 </div>
                 <button
+                  className="delete-btn-hover"
                   style={styles.deleteListItemBtn}
                   onClick={(e) => handleDeleteProject(p.id, e)}
                   title="Delete Project"
@@ -393,6 +395,7 @@ export default function Dashboard() {
               <div
                 key={c.id}
                 onClick={() => setSelectedChatId(c.id)}
+                className={`sidebar-list-item ${c.id === selectedChatId ? 'sidebar-list-item-active' : ''}`}
                 style={{
                   ...styles.listItem,
                   ...(c.id === selectedChatId ? styles.listItemActive : {}),
@@ -407,6 +410,7 @@ export default function Dashboard() {
                   <div style={{ ...styles.smallMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.id.slice(0, 8)}...</div>
                 </div>
                 <button
+                  className="delete-btn-hover"
                   style={styles.deleteListItemBtn}
                   onClick={(e) => handleDeleteChat(c.id, e)}
                   title="Delete Chat"
@@ -510,7 +514,7 @@ export default function Dashboard() {
                 />
                 Set as Active Default Prompt
               </label>
-              <button type="submit" style={styles.savePromptBtn} disabled={savingPrompt}>
+              <button type="submit" className="action-btn-gradient" style={styles.savePromptBtn} disabled={savingPrompt}>
                 {savingPrompt ? "Saving..." : "Add Prompt"}
               </button>
             </form>
@@ -597,7 +601,7 @@ export default function Dashboard() {
                   if (e.key === "Enter") handleSend();
                 }}
               />
-              <button style={styles.sendBtn} onClick={handleSend} disabled={sending}>
+              <button className="action-btn-gradient" style={styles.sendBtn} onClick={handleSend} disabled={sending}>
                 <Send size={18} />
                 Send
               </button>
@@ -608,8 +612,8 @@ export default function Dashboard() {
 
       {/* Modals */}
       {activeModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
+        <div className="modal-overlay-fade" style={styles.modalOverlay}>
+          <div className="modal-content-scale" style={styles.modalContent}>
             <h3 style={styles.modalTitle}>
               {activeModal === "createProject" ? "Create New Project" : "Create New Chat"}
             </h3>
@@ -634,6 +638,7 @@ export default function Dashboard() {
                 Cancel
               </button>
               <button
+                className="action-btn-gradient"
                 style={{ ...styles.modalBtn, ...styles.confirmBtn }}
                 onClick={activeModal === "createProject" ? submitCreateProject : submitCreateChat}
               >
@@ -649,6 +654,7 @@ export default function Dashboard() {
         {toasts.map((t) => (
           <div
             key={t.id}
+            className="toast-slide-in"
             style={{
               ...styles.toast,
               background:
@@ -676,7 +682,7 @@ const styles = {
     gridTemplateColumns: "320px 1fr",
     background: "linear-gradient(135deg, #0f172a, #111827)",
     color: "#fff",
-    fontFamily: "system-ui, sans-serif",
+    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
   },
   sidebar: {
     borderRight: "1px solid rgba(255,255,255,0.08)",

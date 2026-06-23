@@ -239,3 +239,96 @@
   color: #fff;
   border-color: rgba(239, 68, 68, 0.35);
 }
+
+/* Premium polished scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Glassmorphism sidebar */
+.glass-sidebar {
+  border-right: 1px solid rgba(255,255,255,0.08) !important;
+  background: rgba(10, 15, 30, 0.65) !important;
+  backdrop-filter: blur(24px) !important;
+}
+
+/* Sleek interactive list items */
+.sidebar-list-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  background: rgba(255,255,255,0.03) !important;
+}
+.sidebar-list-item:hover {
+  background: rgba(255,255,255,0.08) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+  transform: translateY(-1px);
+}
+.sidebar-list-item-active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.15)) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+}
+
+/* Sleek delete item hover effects */
+.delete-btn-hover {
+  transition: all 0.2s ease !important;
+}
+.delete-btn-hover:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Sleek primary action gradient buttons */
+.action-btn-gradient {
+  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+}
+.action-btn-gradient:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+.action-btn-gradient:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Modal overlay & content animations */
+.modal-overlay-fade {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+.modal-content-scale {
+  animation: scaleUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Toast animations */
+.toast-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
