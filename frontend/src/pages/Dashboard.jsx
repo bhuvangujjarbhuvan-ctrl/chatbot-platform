@@ -451,6 +451,36 @@ export default function Dashboard() {
 
         {showSettings ? (
           <div style={styles.settingsArea}>
+            <h3 style={styles.settingsHeading}>Project Settings</h3>
+            <p style={styles.settingsSub}>
+              Configure preferred AI model for <b>{selectedProject?.name}</b>.
+            </p>
+
+            <div style={styles.promptForm}>
+              <h4 style={styles.formSectionTitle}>Active Model</h4>
+              <select
+                style={styles.settingsInput}
+                value={selectedProject?.modelName || "openai/gpt-4o-mini"}
+                onChange={async (e) => {
+                  const newModel = e.target.value;
+                  try {
+                    await api.updateProject(selectedProjectId, { modelName: newModel });
+                    addToast("Active model updated successfully!", "success");
+                    await loadProjects();
+                  } catch (err) {
+                    addToast(err.message || "Failed to update model settings", "error");
+                  }
+                }}
+              >
+                <option value="openai/gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+                <option value="google/gemini-2.5-flash">Gemini 2.5 Flash (Google)</option>
+                <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Anthropic)</option>
+                <option value="meta-llama/llama-3-8b-instruct">Llama 3.1 8B (Meta)</option>
+              </select>
+            </div>
+
+            <hr style={{ border: "0.5px solid rgba(255,255,255,0.08)", margin: "10px 0" }} />
+
             <h3 style={styles.settingsHeading}>System Instructions (Prompts)</h3>
             <p style={styles.settingsSub}>
               Configure the default system prompt/persona instructions for this project.

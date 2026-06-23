@@ -155,4 +155,10 @@ export const api = {
     request(`/chats/${chatId}`, {
       method: "DELETE",
     }),
+
+  updateProject: (projectId, payload) =>
+    request(`/projects/${projectId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
 };

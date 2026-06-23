@@ -121,6 +121,12 @@ router.post(
       orderBy: { createdAt: "desc" },
     });
 
+    // Get project model setting
+    const project = await prisma.project.findUnique({
+      where: { id: chat.projectId },
+      select: { modelName: true },
+    });
+
     // 4) Get last messages for context (latest 20)
     const lastMessages = await prisma.message.findMany({
       where: { chatId: chat.id },
@@ -158,6 +164,7 @@ Rules:
       await streamAssistantReply({
         systemText,
         messages: llmMessages,
+        model: project?.modelName,
         onChunk: (chunk) => {
           res.write(`event: chunk\ndata: ${JSON.stringify({ text: chunk })}\n\n`);
         },
