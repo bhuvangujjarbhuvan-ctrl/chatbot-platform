@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
 import { LogOut, Plus, Send, MessageSquare, Settings, Trash2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -573,7 +574,13 @@ export default function Dashboard() {
                       }}
                     >
                       <div style={styles.msgRole}>{m.role === "user" ? "You" : "AI"}</div>
-                      <div style={styles.msgText}>{m.content}</div>
+                      {m.role === "user" ? (
+                        <div style={styles.msgText}>{m.content}</div>
+                      ) : (
+                        <div style={styles.msgText} className="markdown-content">
+                          <ReactMarkdown>{m.content}</ReactMarkdown>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
