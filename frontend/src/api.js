@@ -46,7 +46,11 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  me: () => request("/auth/me"),
+
   getProjects: () => request("/projects"),
+
+  listProjects: () => request("/projects"),
 
   createProject: (payload) =>
     request("/projects", {
@@ -55,6 +59,8 @@ export const api = {
     }),
 
   getChats: (projectId) => request(`/projects/${projectId}/chats`),
+
+  listChats: (projectId) => request(`/projects/${projectId}/chats`),
 
   createChat: (projectId, payload) =>
     request(`/projects/${projectId}/chats`, {

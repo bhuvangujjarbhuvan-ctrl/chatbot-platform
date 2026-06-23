@@ -25,7 +25,7 @@ export default function Login() {
       console.log("LOGIN RESPONSE", res);
 
       localStorage.setItem("token", res.token);
-      navigate("/app");
+      navigate("/");
     } catch (err) {
       console.error("LOGIN ERROR", err);
       setMsg(err.response?.data?.error || "Login failed");
