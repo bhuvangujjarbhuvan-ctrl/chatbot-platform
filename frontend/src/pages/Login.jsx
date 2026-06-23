@@ -122,7 +122,8 @@ const styles = {
   },
   divider: {
     border: "none",
-    borderTop: "1px solid rgba(255, 255, 255, 0.12)",
-    margin: "8px 0",
+    borderTop: "1.5px solid rgba(255, 255, 255, 0.3)",
+    margin: "12px 0",
+    width: "100%",
   },
 };
