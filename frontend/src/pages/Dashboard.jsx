@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare, Settings } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings, Trash2 } from "lucide-react";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -147,6 +147,39 @@ export default function Dashboard() {
       addToast(`Chat "${title}" created!`, "success");
     } catch (e) {
       addToast(e.message || "Failed to create chat", "error");
+    }
+  }
+
+  async function handleDeleteProject(projectId, e) {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this project and all its chats?")) return;
+    try {
+      await api.deleteProject(projectId);
+      addToast("Project deleted successfully", "success");
+      if (selectedProjectId === projectId) {
+        setSelectedProjectId("");
+        setSelectedChatId("");
+        setMessages([]);
+      }
+      await loadProjects();
+    } catch (err) {
+      addToast(err.message || "Failed to delete project", "error");
+    }
+  }
+
+  async function handleDeleteChat(chatId, e) {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this chat and its history?")) return;
+    try {
+      await api.deleteChat(chatId);
+      addToast("Chat deleted successfully", "success");
+      if (selectedChatId === chatId) {
+        setSelectedChatId("");
+        setMessages([]);
+      }
+      await loadChats(selectedProjectId);
+    } catch (err) {
+      addToast(err.message || "Failed to delete chat", "error");
     }
   }
 
@@ -315,17 +348,30 @@ export default function Dashboard() {
             <div style={styles.muted}>No projects yet</div>
           ) : (
             projects.map((p) => (
-              <button
+              <div
                 key={p.id}
                 onClick={() => setSelectedProjectId(p.id)}
                 style={{
                   ...styles.listItem,
                   ...(p.id === selectedProjectId ? styles.listItemActive : {}),
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
-                <div style={{ fontWeight: 600 }}>{p.name}</div>
-                <div style={styles.smallMuted}>{p.description || "No description"}</div>
-              </button>
+                <div style={{ flex: 1, overflow: "hidden" }}>
+                  <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                  <div style={{ ...styles.smallMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.description || "No description"}</div>
+                </div>
+                <button
+                  style={styles.deleteListItemBtn}
+                  onClick={(e) => handleDeleteProject(p.id, e)}
+                  title="Delete Project"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             ))
           )}
         </div>
@@ -344,17 +390,30 @@ export default function Dashboard() {
             <div style={styles.muted}>No chats yet</div>
           ) : (
             chats.map((c) => (
-              <button
+              <div
                 key={c.id}
                 onClick={() => setSelectedChatId(c.id)}
                 style={{
                   ...styles.listItem,
                   ...(c.id === selectedChatId ? styles.listItemActive : {}),
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
-                <div style={{ fontWeight: 600 }}>{c.title}</div>
-                <div style={styles.smallMuted}>{c.id.slice(0, 8)}...</div>
-              </button>
+                <div style={{ flex: 1, overflow: "hidden" }}>
+                  <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</div>
+                  <div style={{ ...styles.smallMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.id.slice(0, 8)}...</div>
+                </div>
+                <button
+                  style={styles.deleteListItemBtn}
+                  onClick={(e) => handleDeleteChat(c.id, e)}
+                  title="Delete Chat"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             ))
           )}
         </div>
@@ -910,5 +969,17 @@ const styles = {
     boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
     maxWidth: 300,
     wordBreak: "break-word",
+  },
+  deleteListItemBtn: {
+    border: "none",
+    background: "transparent",
+    color: "rgba(255, 255, 255, 0.4)",
+    cursor: "pointer",
+    padding: 6,
+    borderRadius: 8,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
   },
 };

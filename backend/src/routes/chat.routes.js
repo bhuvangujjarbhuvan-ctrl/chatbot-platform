@@ -181,4 +181,23 @@ Rules:
   }),
 );
 
+router.delete(
+  "/chats/:chatId",
+  asyncHandler(async (req, res) => {
+    const chat = await prisma.chat.findFirst({
+      where: { id: req.params.chatId, project: { userId: req.user.id } },
+    });
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    await prisma.chat.delete({
+      where: { id: chat.id },
+    });
+
+    res.json({ success: true, message: "Chat deleted successfully" });
+  }),
+);
+
 export default router;

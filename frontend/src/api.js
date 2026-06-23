@@ -145,4 +145,14 @@ export const api = {
       if (onError) onError(err);
     }
   },
+
+  deleteProject: (projectId) =>
+    request(`/projects/${projectId}`, {
+      method: "DELETE",
+    }),
+
+  deleteChat: (chatId) =>
+    request(`/chats/${chatId}`, {
+      method: "DELETE",
+    }),
 };

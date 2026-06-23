@@ -40,4 +40,23 @@ router.post(
   }),
 );
 
+router.delete(
+  "/:projectId",
+  asyncHandler(async (req, res) => {
+    const project = await prisma.project.findFirst({
+      where: { id: req.params.projectId, userId: req.user.id },
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    await prisma.project.delete({
+      where: { id: project.id },
+    });
+
+    res.json({ success: true, message: "Project deleted successfully" });
+  }),
+);
+
 export default router;
