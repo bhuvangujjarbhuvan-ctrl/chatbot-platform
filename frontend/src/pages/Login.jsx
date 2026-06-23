@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {api} from "../api"; // adjust path if needed
+import { api } from "../api"; // adjust path if needed
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -25,6 +25,7 @@ export default function Login() {
       console.log("LOGIN RESPONSE", res);
 
       localStorage.setItem("token", res.token);
+      if (onLogin) onLogin(res.token);
       navigate("/");
     } catch (err) {
       console.error("LOGIN ERROR", err);
