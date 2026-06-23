@@ -52,6 +52,14 @@ export const api = {
 
   listProjects: () => request("/projects"),
 
+  getPrompts: (projectId) => request(`/projects/${projectId}/prompts`),
+
+  createPrompt: (projectId, payload) =>
+    request(`/projects/${projectId}/prompts`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   createProject: (payload) =>
     request("/projects", {
       method: "POST",

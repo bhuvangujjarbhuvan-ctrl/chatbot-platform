@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings } from "lucide-react";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -18,6 +18,14 @@ export default function Dashboard() {
   const [loadingChats, setLoadingChats] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
+
+  const [showSettings, setShowSettings] = useState(false);
+  const [prompts, setPrompts] = useState([]);
+  const [newPromptTitle, setNewPromptTitle] = useState("");
+  const [newPromptContent, setNewPromptContent] = useState("");
+  const [newPromptIsDefault, setNewPromptIsDefault] = useState(true);
+  const [loadingPrompts, setLoadingPrompts] = useState(false);
+  const [savingPrompt, setSavingPrompt] = useState(false);
 
   const bottomRef = useRef(null);
 
@@ -145,6 +153,43 @@ export default function Dashboard() {
     }
   }
 
+  async function loadPrompts(projectId) {
+    if (!projectId) return;
+    setLoadingPrompts(true);
+    try {
+      const data = await api.getPrompts(projectId);
+      setPrompts(data.prompts || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingPrompts(false);
+    }
+  }
+
+  async function handleCreatePrompt(e) {
+    e.preventDefault();
+    if (!selectedProjectId) return;
+    if (!newPromptTitle.trim() || !newPromptContent.trim()) {
+      alert("Title and Content are required.");
+      return;
+    }
+    setSavingPrompt(true);
+    try {
+      await api.createPrompt(selectedProjectId, {
+        title: newPromptTitle,
+        content: newPromptContent,
+        isDefault: newPromptIsDefault,
+      });
+      setNewPromptTitle("");
+      setNewPromptContent("");
+      await loadPrompts(selectedProjectId);
+    } catch (err) {
+      alert(err.message || "Failed to create prompt");
+    } finally {
+      setSavingPrompt(false);
+    }
+  }
+
   function logout() {
     localStorage.removeItem("token");
     window.location.href = "/login";
@@ -160,8 +205,15 @@ export default function Dashboard() {
       setSelectedChatId("");
       setMessages([]);
       loadChats(selectedProjectId);
+      setShowSettings(false);
     }
   }, [selectedProjectId]);
+
+  useEffect(() => {
+    if (selectedProjectId && showSettings) {
+      loadPrompts(selectedProjectId);
+    }
+  }, [selectedProjectId, showSettings]);
 
   useEffect(() => {
     if (selectedChatId) {
@@ -253,70 +305,148 @@ export default function Dashboard() {
               {selectedProject ? selectedProject.name : "Select a project"}
             </div>
             <div style={styles.chatSub}>
-              {selectedChat ? selectedChat.title : "Select or create a chat"}
+              {showSettings ? "Project Settings & Prompts" : (selectedChat ? selectedChat.title : "Select or create a chat")}
             </div>
           </div>
+          {selectedProject && (
+            <button
+              style={{
+                ...styles.iconBtn,
+                background: showSettings ? "rgba(59, 130, 246, 0.4)" : "rgba(255,255,255,0.08)",
+              }}
+              onClick={() => setShowSettings(!showSettings)}
+              title="Project Settings / Prompts"
+            >
+              <Settings size={18} />
+            </button>
+          )}
         </div>
 
-        <div style={styles.chatArea}>
-          {loadingMessages ? (
-            <div style={styles.muted}>Loading messages...</div>
-          ) : messages.length === 0 ? (
-            <div style={styles.emptyState}>
-              <div style={styles.emptyTitle}>Start chatting ✨</div>
-              <div style={styles.emptySub}>
-                Create a chat and send your first message.
-              </div>
+        {showSettings ? (
+          <div style={styles.settingsArea}>
+            <h3 style={styles.settingsHeading}>System Instructions (Prompts)</h3>
+            <p style={styles.settingsSub}>
+              Configure the default system prompt/persona instructions for this project.
+            </p>
+
+            <form onSubmit={handleCreatePrompt} style={styles.promptForm}>
+              <h4 style={styles.formSectionTitle}>Create New Prompt</h4>
+              <input
+                style={styles.settingsInput}
+                placeholder="Prompt Title (e.g. Creative Assistant)"
+                value={newPromptTitle}
+                onChange={(e) => setNewPromptTitle(e.target.value)}
+                required
+              />
+              <textarea
+                style={styles.settingsTextarea}
+                placeholder="System instructions content..."
+                value={newPromptContent}
+                onChange={(e) => setNewPromptContent(e.target.value)}
+                required
+              />
+              <label style={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={newPromptIsDefault}
+                  onChange={(e) => setNewPromptIsDefault(e.target.checked)}
+                />
+                Set as Active Default Prompt
+              </label>
+              <button type="submit" style={styles.savePromptBtn} disabled={savingPrompt}>
+                {savingPrompt ? "Saving..." : "Add Prompt"}
+              </button>
+            </form>
+
+            <div style={styles.promptsList}>
+              <h4 style={styles.formSectionTitle}>Existing Prompts</h4>
+              {loadingPrompts ? (
+                <div style={styles.muted}>Loading prompts...</div>
+              ) : prompts.length === 0 ? (
+                <div style={styles.muted}>No custom prompts defined. Using system default.</div>
+              ) : (
+                prompts.map((p) => (
+                  <div
+                    key={p.id}
+                    style={{
+                      ...styles.promptCard,
+                      border: p.isDefault ? "1px solid #22c55e" : "1px solid rgba(255,255,255,0.08)",
+                      background: p.isDefault ? "rgba(34, 197, 150, 0.05)" : "rgba(255,255,255,0.02)",
+                    }}
+                  >
+                    <div style={styles.promptHeader}>
+                      <span style={styles.promptTitle}>{p.title}</span>
+                      {p.isDefault && <span style={styles.defaultBadge}>Active Default</span>}
+                    </div>
+                    <pre style={styles.promptContent}>{p.content}</pre>
+                  </div>
+                ))
+              )}
             </div>
-          ) : (
-            messages.map((m) => (
-              <div
-                key={m.id}
-                style={{
-                  ...styles.msgRow,
-                  justifyContent: m.role === "user" ? "flex-end" : "flex-start",
-                }}
-              >
-                <div
-                  style={{
-                    ...styles.msgBubble,
-                    ...(m.role === "user" ? styles.userBubble : styles.aiBubble),
-                  }}
-                >
-                  <div style={styles.msgRole}>{m.role === "user" ? "You" : "AI"}</div>
-                  <div style={styles.msgText}>{m.content}</div>
+          </div>
+        ) : (
+          <>
+            <div style={styles.chatArea}>
+              {loadingMessages ? (
+                <div style={styles.muted}>Loading messages...</div>
+              ) : messages.length === 0 ? (
+                <div style={styles.emptyState}>
+                  <div style={styles.emptyTitle}>Start chatting ✨</div>
+                  <div style={styles.emptySub}>
+                    Create a chat and send your first message.
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
+              ) : (
+                messages.map((m) => (
+                  <div
+                    key={m.id}
+                    style={{
+                      ...styles.msgRow,
+                      justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+                    }}
+                  >
+                    <div
+                      style={{
+                        ...styles.msgBubble,
+                        ...(m.role === "user" ? styles.userBubble : styles.aiBubble),
+                      }}
+                    >
+                      <div style={styles.msgRole}>{m.role === "user" ? "You" : "AI"}</div>
+                      <div style={styles.msgText}>{m.content}</div>
+                    </div>
+                  </div>
+                ))
+              )}
 
-          {sending && (
-            <div style={{ ...styles.msgRow, justifyContent: "flex-start" }}>
-              <div style={{ ...styles.msgBubble, ...styles.aiBubble, opacity: 0.7 }}>
-                <div style={styles.msgRole}>AI</div>
-                <div style={styles.msgText}>Typing...</div>
-              </div>
+              {sending && (
+                <div style={{ ...styles.msgRow, justifyContent: "flex-start" }}>
+                  <div style={{ ...styles.msgBubble, ...styles.aiBubble, opacity: 0.7 }}>
+                    <div style={styles.msgRole}>AI</div>
+                    <div style={styles.msgText}>Typing...</div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={bottomRef} />
             </div>
-          )}
 
-          <div ref={bottomRef} />
-        </div>
-
-        <div style={styles.inputBar}>
-          <input
-            style={styles.input}
-            placeholder="Type a message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSend();
-            }}
-          />
-          <button style={styles.sendBtn} onClick={handleSend} disabled={sending}>
-            <Send size={18} />
-            Send
-          </button>
-        </div>
+            <div style={styles.inputBar}>
+              <input
+                style={styles.input}
+                placeholder="Type a message..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSend();
+                }}
+              />
+              <button style={styles.sendBtn} onClick={handleSend} disabled={sending}>
+                <Send size={18} />
+                Send
+              </button>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
@@ -422,6 +552,108 @@ const styles = {
     borderBottom: "1px solid rgba(255,255,255,0.08)",
     background: "rgba(255,255,255,0.03)",
     backdropFilter: "blur(12px)",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  settingsArea: {
+    flex: 1,
+    overflow: "auto",
+    padding: 24,
+    display: "flex",
+    flexDirection: "column",
+    gap: 20,
+    maxWidth: 700,
+    margin: "0 auto",
+    width: "100%",
+  },
+  settingsHeading: { fontSize: 20, fontWeight: 800, margin: 0 },
+  settingsSub: { fontSize: 14, opacity: 0.7, margin: 0 },
+  promptForm: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    background: "rgba(255,255,255,0.03)",
+    padding: 16,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.08)",
+  },
+  formSectionTitle: { fontSize: 16, fontWeight: 700, margin: "0 0 4px 0" },
+  settingsInput: {
+    padding: "10px 12px",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(0,0,0,0.2)",
+    color: "#fff",
+    outline: "none",
+    fontSize: 14,
+  },
+  settingsTextarea: {
+    padding: "10px 12px",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(0,0,0,0.2)",
+    color: "#fff",
+    outline: "none",
+    fontSize: 14,
+    minHeight: 80,
+    resize: "vertical",
+    fontFamily: "inherit",
+  },
+  checkboxLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: 13,
+    cursor: "pointer",
+  },
+  savePromptBtn: {
+    alignSelf: "flex-start",
+    border: "none",
+    cursor: "pointer",
+    borderRadius: 10,
+    padding: "10px 16px",
+    fontWeight: 700,
+    color: "#fff",
+    background: "linear-gradient(135deg, #22c55e, #3b82f6)",
+  },
+  promptsList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
+  promptCard: {
+    padding: 14,
+    borderRadius: 12,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+  },
+  promptHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  promptTitle: { fontWeight: 700, fontSize: 14 },
+  defaultBadge: {
+    background: "#22c55e",
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: 800,
+    padding: "3px 8px",
+    borderRadius: 8,
+    textTransform: "uppercase",
+  },
+  promptContent: {
+    margin: 0,
+    fontSize: 13,
+    opacity: 0.85,
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-all",
+    background: "rgba(0,0,0,0.15)",
+    padding: 10,
+    borderRadius: 8,
+    fontFamily: "monospace",
   },
   chatTitle: { fontSize: 18, fontWeight: 800 },
   chatSub: { fontSize: 13, opacity: 0.75, marginTop: 2 },
