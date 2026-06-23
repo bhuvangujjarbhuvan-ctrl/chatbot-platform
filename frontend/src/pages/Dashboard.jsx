@@ -27,6 +27,18 @@ export default function Dashboard() {
   const [loadingPrompts, setLoadingPrompts] = useState(false);
   const [savingPrompt, setSavingPrompt] = useState(false);
 
+  const [activeModal, setActiveModal] = useState(null);
+  const [modalInput, setModalInput] = useState("");
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = (message, type = "info") => {
+    const id = crypto.randomUUID();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  };
+
   const bottomRef = useRef(null);
 
   const selectedProject = useMemo(
@@ -87,36 +99,60 @@ export default function Dashboard() {
     }
   }
 
-  async function handleCreateProject() {
-    const name = prompt("Project name?");
-    if (!name) return;
-
-    const data = await api.createProject({
-      name,
-      description: "My chatbot project",
-    });
-
-    await loadProjects();
-    setSelectedProjectId(data.project.id);
-    setSelectedChatId("");
-    setMessages([]);
+  function triggerCreateProject() {
+    setModalInput("");
+    setActiveModal("createProject");
   }
 
-  async function handleCreateChat() {
+  async function submitCreateProject() {
+    const name = modalInput.trim();
+    if (!name) {
+      addToast("Project name is required", "error");
+      return;
+    }
+    try {
+      const data = await api.createProject({
+        name,
+        description: "My chatbot project",
+      });
+      await loadProjects();
+      setSelectedProjectId(data.project.id);
+      setSelectedChatId("");
+      setMessages([]);
+      setActiveModal(null);
+      addToast(`Project "${name}" created!`, "success");
+    } catch (e) {
+      addToast(e.message || "Failed to create project", "error");
+    }
+  }
+
+  function triggerCreateChat() {
+    if (!selectedProjectId) {
+      addToast("Select a project first", "warning");
+      return;
+    }
+    setModalInput("");
+    setActiveModal("createChat");
+  }
+
+  async function submitCreateChat() {
     if (!selectedProjectId) return;
-
-    const title = prompt("Chat title?") || "New Chat";
-
-    const data = await api.createChat(selectedProjectId, { title });
-
-    await loadChats(selectedProjectId);
-    setSelectedChatId(data.chat.id);
-    setMessages([]);
+    const title = modalInput.trim() || "New Chat";
+    try {
+      const data = await api.createChat(selectedProjectId, { title });
+      await loadChats(selectedProjectId);
+      setSelectedChatId(data.chat.id);
+      setMessages([]);
+      setActiveModal(null);
+      addToast(`Chat "${title}" created!`, "success");
+    } catch (e) {
+      addToast(e.message || "Failed to create chat", "error");
+    }
   }
 
   async function handleSend() {
     if (!selectedChatId) {
-      alert("Create/select a chat first");
+      addToast("Create/select a chat first", "warning");
       return;
     }
 
@@ -147,7 +183,7 @@ export default function Dashboard() {
       }
       scrollToBottom();
     } catch (e) {
-      alert(e.message);
+      addToast(e.message, "error");
     } finally {
       setSending(false);
     }
@@ -170,7 +206,7 @@ export default function Dashboard() {
     e.preventDefault();
     if (!selectedProjectId) return;
     if (!newPromptTitle.trim() || !newPromptContent.trim()) {
-      alert("Title and Content are required.");
+      addToast("Title and Content are required.", "warning");
       return;
     }
     setSavingPrompt(true);
@@ -183,8 +219,9 @@ export default function Dashboard() {
       setNewPromptTitle("");
       setNewPromptContent("");
       await loadPrompts(selectedProjectId);
+      addToast("Prompt added successfully!", "success");
     } catch (err) {
-      alert(err.message || "Failed to create prompt");
+      addToast(err.message || "Failed to create prompt", "error");
     } finally {
       setSavingPrompt(false);
     }
@@ -235,7 +272,7 @@ export default function Dashboard() {
 
         <div style={styles.sectionHeader}>
           <span>Projects</span>
-          <button style={styles.iconBtn} onClick={handleCreateProject} title="Create Project">
+          <button style={styles.iconBtn} onClick={triggerCreateProject} title="Create Project">
             <Plus size={18} />
           </button>
         </div>
@@ -264,7 +301,7 @@ export default function Dashboard() {
 
         <div style={styles.sectionHeader}>
           <span>Chats</span>
-          <button style={styles.iconBtn} onClick={handleCreateChat} title="Create Chat">
+          <button style={styles.iconBtn} onClick={triggerCreateChat} title="Create Chat">
             <MessageSquare size={18} />
           </button>
         </div>
@@ -448,6 +485,66 @@ export default function Dashboard() {
           </>
         )}
       </main>
+
+      {/* Modals */}
+      {activeModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <h3 style={styles.modalTitle}>
+              {activeModal === "createProject" ? "Create New Project" : "Create New Chat"}
+            </h3>
+            <input
+              style={styles.modalInput}
+              placeholder={activeModal === "createProject" ? "Project Name" : "Chat Title"}
+              value={modalInput}
+              onChange={(e) => setModalInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (activeModal === "createProject") submitCreateProject();
+                  else submitCreateChat();
+                }
+              }}
+              autoFocus
+            />
+            <div style={styles.modalActions}>
+              <button
+                style={{ ...styles.modalBtn, ...styles.cancelBtn }}
+                onClick={() => setActiveModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+                style={{ ...styles.modalBtn, ...styles.confirmBtn }}
+                onClick={activeModal === "createProject" ? submitCreateProject : submitCreateChat}
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toasts Container */}
+      <div style={styles.toastContainer}>
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            style={{
+              ...styles.toast,
+              background:
+                t.type === "success"
+                  ? "#22c55e"
+                  : t.type === "error"
+                  ? "#ef4444"
+                  : t.type === "warning"
+                  ? "#f59e0b"
+                  : "#3b82f6",
+            }}
+          >
+            {t.message}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -717,5 +814,70 @@ const styles = {
     fontWeight: 800,
     color: "#fff",
     background: "linear-gradient(135deg, #22c55e, #3b82f6)",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(0,0,0,0.6)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+    backdropFilter: "blur(4px)",
+  },
+  modalContent: {
+    background: "#1e293b",
+    border: "1px solid rgba(255,255,255,0.1)",
+    padding: 24,
+    borderRadius: 16,
+    width: "100%",
+    maxWidth: 400,
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+  },
+  modalTitle: { margin: 0, fontSize: 18, fontWeight: 800 },
+  modalInput: {
+    padding: "12px 14px",
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.15)",
+    background: "rgba(0,0,0,0.25)",
+    color: "#fff",
+    outline: "none",
+    fontSize: 14,
+  },
+  modalActions: { display: "flex", justifyContent: "flex-end", gap: 12 },
+  modalBtn: {
+    border: "none",
+    cursor: "pointer",
+    borderRadius: 10,
+    padding: "10px 16px",
+    fontWeight: 700,
+    fontSize: 13,
+  },
+  cancelBtn: { background: "rgba(255,255,255,0.08)", color: "#fff" },
+  confirmBtn: { background: "linear-gradient(135deg, #22c55e, #3b82f6)", color: "#fff" },
+  toastContainer: {
+    position: "fixed",
+    top: 20,
+    right: 20,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    zIndex: 10000,
+  },
+  toast: {
+    padding: "12px 20px",
+    borderRadius: 12,
+    color: "#fff",
+    fontWeight: 600,
+    fontSize: 14,
+    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
+    maxWidth: 300,
+    wordBreak: "break-word",
   },
 };
