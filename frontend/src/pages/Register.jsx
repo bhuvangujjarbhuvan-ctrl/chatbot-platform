@@ -20,7 +20,7 @@ export default function Register() {
       setTimeout(() => navigate("/"), 900);
     } catch (err) {
       setMsg({
-        text: err.response?.data?.error || "Register failed",
+        text: err.message || "Register failed",
         type: "danger",
       });
     }
