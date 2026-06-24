@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare, Settings, Trash2 } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 export default function Dashboard() {
@@ -14,6 +14,8 @@ export default function Dashboard() {
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [editingChatId, setEditingChatId] = useState("");
+  const [editingChatTitle, setEditingChatTitle] = useState("");
 
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingChats, setLoadingChats] = useState(false);
@@ -181,6 +183,24 @@ export default function Dashboard() {
       await loadChats(selectedProjectId);
     } catch (err) {
       addToast(err.message || "Failed to delete chat", "error");
+    }
+  }
+
+  async function handleRenameChat(chatId) {
+    const title = editingChatTitle.trim();
+    if (!title) {
+      addToast("Chat title cannot be empty", "warning");
+      return;
+    }
+    try {
+      await api.updateChat(chatId, { title });
+      addToast("Chat renamed successfully", "success");
+      setChats((prev) =>
+        prev.map((c) => (c.id === chatId ? { ...c, title } : c))
+      );
+      setEditingChatId("");
+    } catch (err) {
+      addToast(err.message || "Failed to rename chat", "error");
     }
   }
 
@@ -406,18 +426,57 @@ export default function Dashboard() {
                   gap: 8,
                 }}
               >
-                <div style={{ flex: 1, overflow: "hidden" }}>
-                  <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</div>
-                  <div style={{ ...styles.smallMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.id.slice(0, 8)}...</div>
-                </div>
-                <button
-                  className="delete-btn-hover"
-                  style={styles.deleteListItemBtn}
-                  onClick={(e) => handleDeleteChat(c.id, e)}
-                  title="Delete Chat"
-                >
-                  <Trash2 size={14} />
-                </button>
+                {c.id === editingChatId ? (
+                  <div style={{ flex: 1, overflow: "hidden" }} onClick={(e) => e.stopPropagation()}>
+                    <input
+                      style={styles.renameInput}
+                      value={editingChatTitle}
+                      onChange={(e) => setEditingChatTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleRenameChat(c.id);
+                        if (e.key === "Escape") setEditingChatId("");
+                      }}
+                      onBlur={() => handleRenameChat(c.id)}
+                      autoFocus
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      style={{ flex: 1, overflow: "hidden" }}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        setEditingChatId(c.id);
+                        setEditingChatTitle(c.title || "");
+                      }}
+                    >
+                      <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</div>
+                      <div style={{ ...styles.smallMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.id.slice(0, 8)}...</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <button
+                        className="edit-btn-hover"
+                        style={styles.editListItemBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingChatId(c.id);
+                          setEditingChatTitle(c.title || "");
+                        }}
+                        title="Rename Chat"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        className="delete-btn-hover"
+                        style={styles.deleteListItemBtn}
+                        onClick={(e) => handleDeleteChat(c.id, e)}
+                        title="Delete Chat"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))
           )}
@@ -668,10 +727,10 @@ export default function Dashboard() {
                 t.type === "success"
                   ? "#22c55e"
                   : t.type === "error"
-                  ? "#ef4444"
-                  : t.type === "warning"
-                  ? "#f59e0b"
-                  : "#3b82f6",
+                    ? "#ef4444"
+                    : t.type === "warning"
+                      ? "#f59e0b"
+                      : "#3b82f6",
             }}
           >
             {t.message}
@@ -811,7 +870,7 @@ const styles = {
   formSectionTitle: { fontSize: 16, fontWeight: 700, margin: "0 0 4px 0" },
   settingsInput: {
     padding: "10px 12px",
-    borderRadius: 10,
+    borderRadius: "20px",
     border: "1px solid rgba(255,255,255,0.10)",
     background: "rgba(0,0,0,0.2)",
     color: "#fff",
@@ -1024,6 +1083,30 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     transition: "all 0.2s ease",
+  },
+  editListItemBtn: {
+    border: "none",
+    background: "transparent",
+    color: "rgba(255, 255, 255, 0.4)",
+    cursor: "pointer",
+    padding: 6,
+    borderRadius: 8,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
+  },
+  renameInput: {
+    width: "100%",
+    padding: "4px 8px",
+    borderRadius: 6,
+    border: "1px solid #3b82f6",
+    background: "rgba(0,0,0,0.4)",
+    color: "#fff",
+    outline: "none",
+    fontSize: 13,
+    fontWeight: 600,
+    boxSizing: "border-box",
   },
 };
 

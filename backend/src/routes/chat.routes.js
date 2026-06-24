@@ -208,6 +208,33 @@ Rules:
   }),
 );
 
+// ✅ Rename/update chat
+router.patch(
+  "/chats/:chatId",
+  asyncHandler(async (req, res) => {
+    const chat = await prisma.chat.findFirst({
+      where: { id: req.params.chatId, project: { userId: req.user.id } },
+    });
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    const schema = z.object({
+      title: z.string().min(1, "Title cannot be empty"),
+    });
+
+    const body = schema.parse(req.body);
+
+    const updated = await prisma.chat.update({
+      where: { id: chat.id },
+      data: { title: body.title },
+    });
+
+    res.json({ chat: updated });
+  }),
+);
+
 router.delete(
   "/chats/:chatId",
   asyncHandler(async (req, res) => {

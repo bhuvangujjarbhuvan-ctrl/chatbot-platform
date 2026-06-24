@@ -161,4 +161,10 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
+
+  updateChat: (chatId, payload) =>
+    request(`/chats/${chatId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
 };
