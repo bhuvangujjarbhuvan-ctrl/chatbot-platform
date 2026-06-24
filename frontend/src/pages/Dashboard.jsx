@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
-import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil } from "lucide-react";
+import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 export default function Dashboard() {
@@ -313,6 +313,60 @@ export default function Dashboard() {
     } catch (e) {
       addToast(e.message, "error");
       setMessages((prev) => prev.filter((m) => m.id !== tempAiId));
+      setSending(false);
+    }
+  }
+
+  async function handleRegenerate(messageId) {
+    if (sending) return;
+    setSending(true);
+
+    const msgIndex = messages.findIndex((m) => m.id === messageId);
+    if (msgIndex === -1) {
+      setSending(false);
+      return;
+    }
+
+    const messagesBefore = messages.slice(0, msgIndex);
+    const tempAiId = "temp-ai-message";
+    const tempAiMsg = {
+      id: tempAiId,
+      chatId: selectedChatId,
+      role: "assistant",
+      content: "",
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages([...messagesBefore, tempAiMsg]);
+    scrollToBottom();
+
+    try {
+      await api.regenerateMessageStream(selectedChatId, messageId, {
+        onChunk: (chunk) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === tempAiId ? { ...m, content: m.content + chunk } : m
+            )
+          );
+          scrollToBottom();
+        },
+        onDone: (assistantMsg) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === tempAiId ? assistantMsg : m))
+          );
+          setSending(false);
+          scrollToBottom();
+          addToast("Response regenerated successfully!", "success");
+        },
+        onError: (err) => {
+          addToast(err.message || "Regeneration failed", "error");
+          loadMessages(selectedChatId);
+          setSending(false);
+        },
+      });
+    } catch (e) {
+      addToast(e.message || "Failed to regenerate", "error");
+      loadMessages(selectedChatId);
       setSending(false);
     }
   }
@@ -713,7 +767,19 @@ export default function Dashboard() {
                         ...(m.role === "user" ? styles.userBubble : styles.aiBubble),
                       }}
                     >
-                      <div style={styles.msgRole}>{m.role === "user" ? "You" : "AI"}</div>
+                      <div style={styles.msgRole}>
+                        <span>{m.role === "user" ? "You" : "AI"}</span>
+                        {m.role === "assistant" && m.id !== "temp-ai-message" && (
+                          <button
+                            className="regenerate-btn"
+                            onClick={() => handleRegenerate(m.id)}
+                            disabled={sending}
+                            title="Regenerate response"
+                          >
+                            <RefreshCw size={12} className={sending ? "animate-spin" : ""} />
+                          </button>
+                        )}
+                      </div>
                       {m.role === "user" ? (
                         <div style={styles.msgText}>{m.content}</div>
                       ) : (
@@ -1049,7 +1115,7 @@ const styles = {
   aiBubble: {
     background: "rgba(255,255,255,0.05)",
   },
-  msgRole: { fontSize: 12, opacity: 0.75, marginBottom: 6, fontWeight: 700 },
+  msgRole: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, opacity: 0.75, marginBottom: 6, fontWeight: 700 },
   msgText: { whiteSpace: "pre-wrap", lineHeight: 1.4 },
   emptyState: {
     marginTop: 60,
