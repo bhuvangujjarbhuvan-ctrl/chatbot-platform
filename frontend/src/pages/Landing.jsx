@@ -266,8 +266,9 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
     gap: 24,
+    alignItems: "stretch",
   },
   card: {
     padding: 32,
@@ -275,6 +276,10 @@ const styles = {
     border: "1px solid",
     textAlign: "left",
     transition: "transform 0.25s ease",
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    boxSizing: "border-box",
   },
   cardIcon: {
     fontSize: 28,
