@@ -87,7 +87,7 @@ export default function Landing() {
         <h2 style={styles.sectionTitle}>Key Platform Features</h2>
         <p style={styles.sectionSub}>Everything you need to configure, run, and test customizable AI chat models.</p>
 
-        <div style={styles.grid}>
+        <div className="landing-grid">
           {features.map((f, i) => (
             <div key={i} style={{ ...styles.card, background: f.color, borderColor: f.border }}>
               <div style={styles.cardIcon}>{f.icon}</div>
@@ -248,7 +248,7 @@ const styles = {
   },
   featureSection: {
     padding: "60px 40px 80px 40px",
-    maxWidth: 1100,
+    maxWidth: 1200,
     margin: "0 auto",
     textAlign: "center",
     zIndex: 5,
@@ -263,12 +263,6 @@ const styles = {
     opacity: 0.7,
     marginTop: 8,
     marginBottom: 48,
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-    gap: 24,
-    alignItems: "stretch",
   },
   card: {
     padding: 32,
