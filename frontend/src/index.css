@@ -596,3 +596,13 @@ select option {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Sidebar Search Input Styling */
+.sidebar-search-input {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-search-input:focus {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}

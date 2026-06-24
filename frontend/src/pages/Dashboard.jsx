@@ -49,10 +49,18 @@ export default function Dashboard() {
     [projects, selectedProjectId]
   );
 
+  const [searchQuery, setSearchQuery] = useState("");
+
   const selectedChat = useMemo(
     () => chats.find((c) => c.id === selectedChatId),
     [chats, selectedChatId]
   );
+
+  const filteredChats = useMemo(() => {
+    return chats.filter((c) =>
+      c.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [chats, searchQuery]);
 
   function scrollToBottom() {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
@@ -422,6 +430,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (selectedProjectId) {
       setSelectedChatId("");
+      setSearchQuery("");
       setMessages([]);
       loadChats(selectedProjectId);
       setShowSettings(false);
@@ -503,13 +512,28 @@ export default function Dashboard() {
           </button>
         </div>
 
+        {selectedProjectId && chats.length > 0 && (
+          <div className="sidebar-search-container" style={styles.searchContainer}>
+            <input
+              type="text"
+              className="sidebar-search-input"
+              style={styles.searchInput}
+              placeholder="Search chats..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        )}
+
         <div style={styles.list}>
           {loadingChats ? (
             <div style={styles.muted}>Loading chats...</div>
-          ) : chats.length === 0 ? (
-            <div style={styles.muted}>No chats yet</div>
+          ) : filteredChats.length === 0 ? (
+            <div style={styles.muted}>
+              {searchQuery ? "No matches found" : "No chats yet"}
+            </div>
           ) : (
-            chats.map((c) => (
+            filteredChats.map((c) => (
               <div
                 key={c.id}
                 onClick={() => setSelectedChatId(c.id)}
@@ -948,6 +972,19 @@ const styles = {
     overflow: "auto",
     paddingRight: 4,
     maxHeight: 220,
+  },
+  searchContainer: {
+    padding: "4px 0",
+  },
+  searchInput: {
+    width: "100%",
+    padding: "8px 12px",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.08)",
+    background: "rgba(0,0,0,0.2)",
+    color: "#fff",
+    outline: "none",
+    fontSize: 13,
   },
   listItem: {
     textAlign: "left",
