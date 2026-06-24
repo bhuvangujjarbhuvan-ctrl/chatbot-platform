@@ -3,6 +3,25 @@ import { api } from "../api";
 import { LogOut, Plus, Send, MessageSquare, Settings, Trash2, Pencil, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
+const PROMPT_TEMPLATES = [
+  {
+    title: "General Assistant",
+    content: "You are a helpful, polite, and brief general-purpose AI assistant.",
+  },
+  {
+    title: "Code Debugger",
+    content: "You are an expert software engineer. Analyze the user's code, explain issues clearly, and output optimized, clean code snippets with explanations.",
+  },
+  {
+    title: "Creative Writer",
+    content: "You are a creative writer and storyteller. Help write copy, stories, and brainstorming ideas using rich, descriptive language.",
+  },
+  {
+    title: "UI/UX Specialist",
+    content: "You are a senior UI/UX designer. Critique interface layouts, suggest beautiful modern color palettes, CSS properties, and premium user experience enhancements.",
+  },
+];
+
 export default function Dashboard() {
   const [user, setUser] = useState(null);
 
@@ -709,6 +728,27 @@ export default function Dashboard() {
               Configure the default system prompt/persona instructions for this project.
             </p>
 
+            <div style={styles.presetsContainer}>
+              <h4 style={styles.formSectionTitle}>Apply Persona Presets</h4>
+              <div style={styles.presetsGrid}>
+                {PROMPT_TEMPLATES.map((tmpl) => (
+                  <div
+                    key={tmpl.title}
+                    className="preset-card-hover"
+                    style={styles.presetCard}
+                    onClick={() => {
+                      setNewPromptTitle(tmpl.title);
+                      setNewPromptContent(tmpl.content);
+                      addToast(`Loaded preset "${tmpl.title}"! Click "Add Prompt" below to save.`, "info");
+                    }}
+                  >
+                    <div style={styles.presetTitle}>{tmpl.title}</div>
+                    <div style={styles.presetContentPreview}>{tmpl.content.slice(0, 50)}...</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <form onSubmit={handleCreatePrompt} style={styles.promptForm}>
               <h4 style={styles.formSectionTitle}>Create New Prompt</h4>
               <input
@@ -985,6 +1025,42 @@ const styles = {
     color: "#fff",
     outline: "none",
     fontSize: 13,
+  },
+  presetsContainer: {
+    background: "rgba(255,255,255,0.02)",
+    padding: 16,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.06)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    marginBottom: 16,
+  },
+  presetsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+    gap: 10,
+  },
+  presetCard: {
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 10,
+    padding: 10,
+    cursor: "pointer",
+    textAlign: "left",
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+  },
+  presetTitle: {
+    fontSize: 12,
+    fontWeight: 800,
+    color: "#fff",
+  },
+  presetContentPreview: {
+    fontSize: 10,
+    opacity: 0.6,
+    lineHeight: 1.3,
   },
   listItem: {
     textAlign: "left",
