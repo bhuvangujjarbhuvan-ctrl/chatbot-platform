@@ -204,6 +204,49 @@ export default function Dashboard() {
     }
   }
 
+  function handleExportMarkdown() {
+    if (messages.length === 0) {
+      addToast("No messages to export", "warning");
+      return;
+    }
+    const title = selectedChat?.title || "chat-history";
+    const markdownContent = messages
+      .filter((m) => m.content !== "")
+      .map((m) => {
+        const roleName = m.role === "user" ? "You" : "AI";
+        return `### ${roleName} (${new Date(m.createdAt).toLocaleString()})\n\n${m.content}\n`;
+      })
+      .join("\n---\n\n");
+
+    const blob = new Blob([markdownContent], { type: "text/markdown;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${title.toLowerCase().replace(/\s+/g, "-")}.md`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    addToast("Chat history exported as Markdown!", "success");
+  }
+
+  function handleExportJson() {
+    if (messages.length === 0) {
+      addToast("No messages to export", "warning");
+      return;
+    }
+    const title = selectedChat?.title || "chat-history";
+    const jsonContent = JSON.stringify(messages, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${title.toLowerCase().replace(/\s+/g, "-")}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    addToast("Chat history exported as JSON!", "success");
+  }
+
   async function handleSend() {
     if (!selectedChatId) {
       addToast("Create/select a chat first", "warning");
@@ -500,16 +543,54 @@ export default function Dashboard() {
             </div>
           </div>
           {selectedProject && (
-            <button
-              style={{
-                ...styles.iconBtn,
-                background: showSettings ? "rgba(59, 130, 246, 0.4)" : "rgba(255,255,255,0.08)",
-              }}
-              onClick={() => setShowSettings(!showSettings)}
-              title="Project Settings / Prompts"
-            >
-              <Settings size={18} />
-            </button>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              {selectedChat && !showSettings && (
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    className="action-btn-gradient"
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      border: "none",
+                      color: "#fff",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                    onClick={handleExportMarkdown}
+                    title="Export chat history as Markdown (.md)"
+                  >
+                    Export .MD
+                  </button>
+                  <button
+                    className="action-btn-gradient"
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      border: "none",
+                      color: "#fff",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                    onClick={handleExportJson}
+                    title="Export chat history as JSON (.json)"
+                  >
+                    Export .JSON
+                  </button>
+                </div>
+              )}
+              <button
+                style={{
+                  ...styles.iconBtn,
+                  background: showSettings ? "rgba(59, 130, 246, 0.4)" : "rgba(255,255,255,0.08)",
+                }}
+                onClick={() => setShowSettings(!showSettings)}
+                title="Project Settings / Prompts"
+              >
+                <Settings size={18} />
+              </button>
+            </div>
           )}
         </div>
 
