@@ -79,8 +79,9 @@ export default function Register() {
           <div
             style={{
               ...styles.alert,
-              background: msg.type === "success" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)",
-              color: msg.type === "success" ? "#4ade80" : "#f87171",
+              background: msg.type === "success" ? "rgba(5, 150, 105, 0.08)" : "rgba(239, 68, 68, 0.08)",
+              color: msg.type === "success" ? "#059669" : "#dc2626",
+              border: msg.type === "success" ? "1px solid rgba(5, 150, 105, 0.2)" : "1px solid rgba(239, 68, 68, 0.2)",
             }}
           >
             {msg.text}
@@ -88,10 +89,10 @@ export default function Register() {
         )}
 
         <div style={styles.linkText}>
-          <span style={{ color: "rgba(255,255,255,0.75)" }}>
+          <span>
             Already have an account?{" "}
           </span>
-          <Link to="/" style={{ color: "#3b82f6", fontWeight: 600 }}>Login</Link>
+          <Link to="/" style={{ color: "var(--accent-primary)", fontWeight: 600, textDecoration: "none" }}>Login</Link>
         </div>
       </div>
     </div>
@@ -103,20 +104,21 @@ const styles = {
     minHeight: "100vh",
     display: "grid",
     placeItems: "center",
-    background: "linear-gradient(135deg, #0f172a, #111827)",
-    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+    background: "var(--bg-primary)",
+    fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif",
   },
   card: {
     width: 320,
     padding: 24,
     borderRadius: 16,
-    background: "rgba(255,255,255,0.06)",
+    background: "#FFFFFF",
     backdropFilter: "blur(10px)",
-    color: "#fff",
+    color: "var(--text-body)",
     display: "flex",
     flexDirection: "column",
     gap: 12,
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    boxShadow: "0 20px 50px rgba(42, 27, 61, 0.06)",
   },
   brand: {
     display: "flex",
@@ -130,19 +132,21 @@ const styles = {
     borderRadius: 10,
     display: "grid",
     placeItems: "center",
-    background: "linear-gradient(135deg, #22c55e, #3b82f6)",
+    background: "linear-gradient(135deg, var(--accent-primary), var(--accent-plum))",
     fontSize: 16,
+    color: "#fff",
+    boxShadow: "0 8px 24px rgba(0, 102, 80, 0.2)",
   },
-  brandTitle: { fontWeight: 800, fontSize: 16, margin: 0 },
-  brandSub: { fontSize: 12, opacity: 0.75, margin: 0 },
-  formTitle: { fontSize: 20, fontWeight: 800, margin: "8px 0 2px 0" },
-  formNote: { fontSize: 13, opacity: 0.7, margin: "0 0 10px 0" },
+  brandTitle: { fontWeight: 800, fontSize: 16, margin: 0, color: "var(--text-heading)" },
+  brandSub: { fontSize: 12, color: "var(--text-muted)", margin: 0 },
+  formTitle: { fontSize: 20, fontWeight: 800, margin: "8px 0 2px 0", color: "var(--text-heading)" },
+  formNote: { fontSize: 13, color: "var(--text-body)", opacity: 0.8, margin: "0 0 10px 0" },
   input: {
     padding: 12,
     borderRadius: 12,
-    border: "1px solid rgba(255,255,255,0.2)",
-    background: "rgba(0,0,0,0.3)",
-    color: "#fff",
+    border: "1px solid rgba(0, 0, 0, 0.12)",
+    background: "#FFFFFF",
+    color: "var(--text-body)",
     outline: "none",
   },
   button: {
@@ -153,7 +157,8 @@ const styles = {
     cursor: "pointer",
     fontWeight: 800,
     color: "#fff",
-    background: "linear-gradient(135deg, #22c55e, #3b82f6)",
+    background: "linear-gradient(135deg, var(--accent-primary), var(--accent-plum))",
+    boxShadow: "0 4px 20px rgba(0, 102, 80, 0.25)",
   },
   alert: {
     padding: 10,
@@ -164,12 +169,12 @@ const styles = {
   linkText: {
     textAlign: "center",
     fontSize: 13,
-    opacity: 0.8,
+    color: "var(--text-muted)",
     marginTop: 10,
   },
   divider: {
     border: "none",
-    borderTop: "1.5px solid rgba(255, 255, 255, 0.3)",
+    borderTop: "1.5px solid rgba(0, 0, 0, 0.08)",
     margin: "12px 0",
     width: "100%",
   },
