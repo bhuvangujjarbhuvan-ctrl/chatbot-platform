@@ -109,8 +109,8 @@ const styles = {
   page: {
     position: "relative",
     minHeight: "100vh",
-    background: "#FFFDF9",
-    color: "#2A1B3D",
+    background: "radial-gradient(circle at top left, #2d1b69, #1a0f3e)",
+    color: "#fff",
     fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif",
     overflowX: "hidden",
     display: "flex",
@@ -158,11 +158,13 @@ const styles = {
     placeItems: "center",
     background: "linear-gradient(135deg, #7c3aed, #be185d)",
     fontSize: 18,
+    color: "#fff",
   },
   brandName: {
     fontWeight: 800,
     fontSize: 18,
     letterSpacing: "0.5px",
+    color: "#fff",
   },
   navActions: {
     display: "flex",
@@ -170,7 +172,7 @@ const styles = {
     gap: 20,
   },
   navLink: {
-    color: "rgba(42, 27, 61, 0.8)",
+    color: "rgba(255, 255, 255, 0.85)",
     textDecoration: "none",
     fontSize: 14,
     fontWeight: 600,
