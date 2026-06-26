@@ -6,22 +6,22 @@ export default function Landing() {
       icon: "📁",
       title: "Multi-Project Workspaces",
       desc: "Organize your AI agents, custom personas, and chat histories under separate project contexts.",
-      color: "rgba(99, 102, 241, 0.15)",
-      border: "rgba(99, 102, 241, 0.3)"
+      color: "rgba(124, 58, 237, 0.15)",
+      border: "rgba(124, 58, 237, 0.3)"
     },
     {
       icon: "⚙️",
       title: "Custom System Prompts",
       desc: "Inject system-level guidelines, tones, and boundaries per project to mold AI replies.",
-      color: "rgba(34, 197, 94, 0.12)",
-      border: "rgba(34, 197, 94, 0.25)"
+      color: "rgba(6, 95, 70, 0.12)",
+      border: "rgba(6, 95, 70, 0.25)"
     },
     {
       icon: "🤖",
       title: "Model Customization",
       desc: "Choose and swap preferred OpenRouter models (GPT-4o, Gemini 2.5, Claude, Llama) instantly.",
-      color: "rgba(168, 85, 247, 0.15)",
-      border: "rgba(168, 85, 247, 0.3)"
+      color: "rgba(190, 24, 93, 0.15)",
+      border: "rgba(190, 24, 93, 0.3)"
     },
     {
       icon: "⚡",
@@ -109,8 +109,8 @@ const styles = {
   page: {
     position: "relative",
     minHeight: "100vh",
-    background: "#030712",
-    color: "#fff",
+    background: "#080516",
+    color: "#ddd6fe",
     fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif",
     overflowX: "hidden",
     display: "flex",
@@ -122,7 +122,7 @@ const styles = {
     left: "15%",
     width: "600px",
     height: "600px",
-    background: "radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 70%)",
+    background: "radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(124, 58, 237, 0) 70%)",
     filter: "blur(60px)",
     pointerEvents: "none",
   },
@@ -132,7 +132,7 @@ const styles = {
     right: "10%",
     width: "600px",
     height: "600px",
-    background: "radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0) 70%)",
+    background: "radial-gradient(circle, rgba(6, 95, 70, 0.08) 0%, rgba(6, 95, 70, 0) 70%)",
     filter: "blur(60px)",
     pointerEvents: "none",
   },
@@ -156,7 +156,7 @@ const styles = {
     borderRadius: 10,
     display: "grid",
     placeItems: "center",
-    background: "linear-gradient(135deg, #6366f1, #a855f7)",
+    background: "linear-gradient(135deg, #7c3aed, #be185d)",
     fontSize: 18,
   },
   brandName: {
@@ -211,7 +211,7 @@ const styles = {
     letterSpacing: "-1.5px",
   },
   gradientText: {
-    background: "linear-gradient(135deg, #6366f1, #22c55e)",
+    background: "linear-gradient(135deg, #7c3aed, #059669)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
   },
