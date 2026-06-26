@@ -9,15 +9,39 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #030712;
+  background-color: var(--bg-primary);
 }
 
 /* 3D Visual Depth & Skeuomorphism utilities */
 :root {
-  --shadow-3d-sm: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
-  --shadow-3d-md: 0 8px 16px -4px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
-  --shadow-3d-lg: 0 20px 25px -5px rgba(0,0,0,0.6), 0 10px 10px -5px rgba(0,0,0,0.6), inset 0 1.5px 2px rgba(255,255,255,0.12);
-  --shadow-3d-inset: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.05);
+  /* Creamy Jewel Tone Light Theme */
+  --bg-primary: #FFFDF9;           /* Cream white background */
+  --bg-secondary: #FAF5EB;         /* Slightly darker cream secondary */
+  --bg-tertiary: #F3ECE0;          /* Warm card header backgrounds */
+  --bg-recessed: #FFFFFF;          /* Pure white for text input fields */
+
+  /* Primary Accent: Rich Emerald Green */
+  --accent-primary: #006650;       /* Rich emerald green */
+  --accent-primary-hover: #008064; /* Brighter emerald for hover */
+  --accent-primary-active: #004D3C;/* Darker emerald for press */
+  --accent-primary-glow: rgba(0, 102, 80, 0.2);
+
+  /* Support / Secondary Accent */
+  --accent-plum: #5E2A54;          /* Soft jewel plum */
+  --accent-plum-hover: #733467;
+  --accent-navy: #2A3B50;          /* Soft navy-blue */
+
+  /* Text Hierarchy (WCAG AAA/AA Compliant) */
+  --text-heading: #1A0D38;         /* Deep indigo-black headings */
+  --text-body: #2A1B3D;            /* Deep slate body text */
+  --text-muted: #6B5E78;           /* Muted secondary text */
+  --text-on-accent: #FFFFFF;       /* White text on emerald green buttons */
+
+  /* Shadows adjusted for light mode */
+  --shadow-3d-sm: 0 2px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+  --shadow-3d-md: 0 8px 16px -4px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.08), inset 0 1px 1px rgba(255,255,255,0.9);
+  --shadow-3d-lg: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.08), inset 0 1.5px 2px rgba(255,255,255,0.9);
+  --shadow-3d-inset: inset 0 2px 4px rgba(0,0,0,0.1), 0 1px 1px rgba(255,255,255,0.8);
 }
 
 .elevated-3d-card {
@@ -94,8 +118,8 @@ body {
 
 .app-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at top left, #231557, #130b38);
-  color: #e8eefc;
+  background: radial-gradient(circle at top left, var(--bg-secondary), var(--bg-primary));
+  color: var(--text-body);
   font-family: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
@@ -118,8 +142,8 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #7c3aed, #059669);
-  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.25);
+  background: linear-gradient(135deg, var(--accent-plum), var(--accent-primary));
+  box-shadow: 0 12px 30px var(--accent-primary-glow);
 }
 
 .top-title {
@@ -185,9 +209,9 @@ body {
   text-align: left;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
-  color: #ddd6fe;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-body);
   cursor: pointer;
   transition: 0.15s;
 }
@@ -198,8 +222,8 @@ body {
 }
 
 .list-item.active {
-  border-color: rgba(124, 58, 237, 0.8);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-glow);
 }
 
 .list-title {
@@ -271,13 +295,15 @@ body {
 }
 
 .bubble.user {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(124, 58, 237, 0.15));
-  border-color: rgba(124, 58, 237, 0.35);
+  background: linear-gradient(135deg, rgba(0, 102, 80, 0.12), rgba(0, 102, 80, 0.04));
+  border-color: rgba(0, 102, 80, 0.18);
+  color: var(--text-body);
 }
 
 .bubble.assistant {
-  background: rgba(6, 95, 70, 0.12);
-  border-color: rgba(6, 95, 70, 0.25);
+  background: rgba(94, 42, 84, 0.06);
+  border-color: rgba(94, 42, 84, 0.15);
+  color: var(--text-body);
 }
 
 .bubble-role {
@@ -318,8 +344,8 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #7c3aed, #4c1d95);
-  color: white;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-plum));
+  color: var(--text-on-accent);
   border: none;
 }
 
@@ -355,8 +381,8 @@ body {
 
 /* Glassmorphism sidebar */
 .glass-sidebar {
-  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-  background: rgba(8, 5, 30, 0.65) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background: rgba(253, 251, 247, 0.85) !important;
   backdrop-filter: blur(24px) !important;
 }
 
@@ -368,15 +394,15 @@ body {
 }
 
 .sidebar-list-item:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(124, 58, 237, 0.25) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 102, 80, 0.15) !important;
   transform: translateY(-1px);
 }
 
 .sidebar-list-item-active {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(190, 24, 93, 0.15)) !important;
-  border-color: rgba(124, 58, 237, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.1);
+  background: linear-gradient(135deg, rgba(0, 102, 80, 0.12), rgba(94, 42, 84, 0.06)) !important;
+  border-color: rgba(0, 102, 80, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(0, 102, 80, 0.05);
 }
 
 /* Sleek delete item hover effects */
@@ -400,8 +426,8 @@ body {
 
 /* Sleek primary action gradient buttons */
 .action-btn-gradient {
-  background: linear-gradient(135deg, #7c3aed, #be185d) !important;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-plum)) !important;
+  box-shadow: 0 4px 14px rgba(0, 102, 80, 0.2);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   border: none !important;
 }
@@ -409,7 +435,7 @@ body {
 .action-btn-gradient:hover:not(:disabled) {
   opacity: 0.95;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+  box-shadow: 0 6px 20px rgba(0, 102, 80, 0.3);
 }
 
 .action-btn-gradient:active:not(:disabled) {
@@ -619,9 +645,9 @@ body {
 }
 
 .copy-code-btn.copied {
-  background: rgba(6, 95, 70, 0.2);
-  border-color: rgba(6, 95, 70, 0.4);
-  color: #4ade80;
+  background: rgba(0, 102, 80, 0.15);
+  border-color: rgba(0, 102, 80, 0.3);
+  color: #059669;
 }
 
 /* Landing Page Grid */

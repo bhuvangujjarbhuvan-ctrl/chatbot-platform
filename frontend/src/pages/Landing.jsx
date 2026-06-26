@@ -109,8 +109,8 @@ const styles = {
   page: {
     position: "relative",
     minHeight: "100vh",
-    background: "#130b38",
-    color: "#ddd6fe",
+    background: "#FFFDF9",
+    color: "#2A1B3D",
     fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif",
     overflowX: "hidden",
     display: "flex",
@@ -170,7 +170,7 @@ const styles = {
     gap: 20,
   },
   navLink: {
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "rgba(42, 27, 61, 0.8)",
     textDecoration: "none",
     fontSize: 14,
     fontWeight: 600,
