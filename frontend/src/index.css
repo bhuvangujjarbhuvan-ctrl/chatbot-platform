@@ -94,8 +94,8 @@ body {
 
 .app-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at top left, #0d0a2e, #080516);
-  color: #ddd6fe;
+  background: radial-gradient(circle at top left, #231557, #130b38);
+  color: #e8eefc;
   font-family: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 

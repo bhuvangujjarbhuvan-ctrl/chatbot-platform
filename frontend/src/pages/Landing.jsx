@@ -109,7 +109,7 @@ const styles = {
   page: {
     position: "relative",
     minHeight: "100vh",
-    background: "#080516",
+    background: "#130b38",
     color: "#ddd6fe",
     fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif",
     overflowX: "hidden",
