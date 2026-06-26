@@ -14,34 +14,34 @@ body {
 
 /* 3D Visual Depth & Skeuomorphism utilities */
 :root {
-  /* Creamy Jewel Tone Light Theme */
-  --bg-primary: #FFFDF9;           /* Cream white background */
-  --bg-secondary: #FAF5EB;         /* Slightly darker cream secondary */
-  --bg-tertiary: #F3ECE0;          /* Warm card header backgrounds */
-  --bg-recessed: #FFFFFF;          /* Pure white for text input fields */
+  /* Deep Jewel Tone Dark Theme */
+  --bg-primary: #1a0f3e;           /* Deep indigo background */
+  --bg-secondary: #2d1b69;         /* Rich purple secondary */
+  --bg-tertiary: #140a3c;          /* Darker indigo */
+  --bg-recessed: #0d0628;          /* Deep dark recess */
 
-  /* Primary Accent: Rich Emerald Green */
-  --accent-primary: #006650;       /* Rich emerald green */
-  --accent-primary-hover: #008064; /* Brighter emerald for hover */
-  --accent-primary-active: #004D3C;/* Darker emerald for press */
-  --accent-primary-glow: rgba(0, 102, 80, 0.2);
+  /* Primary Accent: Deep Violet */
+  --accent-primary: #7c3aed;       /* Deep violet */
+  --accent-primary-hover: #8b5cf6; /* Brighter violet for hover */
+  --accent-primary-active: #6d28d9;/* Darker violet for press */
+  --accent-primary-glow: rgba(124, 58, 237, 0.25);
 
   /* Support / Secondary Accent */
-  --accent-plum: #5E2A54;          /* Soft jewel plum */
-  --accent-plum-hover: #733467;
-  --accent-navy: #2A3B50;          /* Soft navy-blue */
+  --accent-plum: #be185d;          /* Dark magenta/plum */
+  --accent-plum-hover: #db2777;
+  --accent-navy: #1d4ed8;          /* Royal blue */
 
   /* Text Hierarchy (WCAG AAA/AA Compliant) */
-  --text-heading: #1A0D38;         /* Deep indigo-black headings */
-  --text-body: #2A1B3D;            /* Deep slate body text */
-  --text-muted: #6B5E78;           /* Muted secondary text */
-  --text-on-accent: #FFFFFF;       /* White text on emerald green buttons */
+  --text-heading: #f3f4f6;         /* Light gray headings */
+  --text-body: #ddd6fe;            /* Soft violet-grey body text */
+  --text-muted: #9ba3af;           /* Muted secondary text */
+  --text-on-accent: #FFFFFF;       /* White text on accent buttons */
 
-  /* Shadows adjusted for light mode */
-  --shadow-3d-sm: 0 2px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
-  --shadow-3d-md: 0 8px 16px -4px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.08), inset 0 1px 1px rgba(255,255,255,0.9);
-  --shadow-3d-lg: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.08), inset 0 1.5px 2px rgba(255,255,255,0.9);
-  --shadow-3d-inset: inset 0 2px 4px rgba(0,0,0,0.1), 0 1px 1px rgba(255,255,255,0.8);
+  /* Shadows adjusted for dark mode */
+  --shadow-3d-sm: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+  --shadow-3d-md: 0 8px 16px -4px rgba(0,0,0,0.6), 0 4px 6px -2px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+  --shadow-3d-lg: 0 20px 25px -5px rgba(0,0,0,0.7), 0 10px 10px -5px rgba(0,0,0,0.6), inset 0 1.5px 2px rgba(255,255,255,0.1);
+  --shadow-3d-inset: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.05);
 }
 
 .elevated-3d-card {
@@ -118,7 +118,7 @@ body {
 
 .app-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at top left, var(--bg-secondary), var(--bg-primary));
+  background: radial-gradient(circle at top left, #2d1b69, #1a0f3e);
   color: var(--text-body);
   font-family: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
@@ -172,7 +172,8 @@ body {
 
 .panel,
 .chat-panel {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  background-color: rgba(45, 27, 105, 0.15); /* Slight indigo tint */
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   overflow: hidden;
@@ -209,8 +210,8 @@ body {
   text-align: left;
   padding: 12px;
   border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--text-body);
   cursor: pointer;
   transition: 0.15s;
@@ -381,8 +382,8 @@ body {
 
 /* Glassmorphism sidebar */
 .glass-sidebar {
-  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
-  background: rgba(253, 251, 247, 0.85) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(20, 10, 60, 0.75) !important;
   backdrop-filter: blur(24px) !important;
 }
 
@@ -672,7 +673,7 @@ body {
 }
 
 select option {
-  background-color: #0d0a2e;
+  background-color: #1a0f3e;
   color: #fff;
   border-radius: 8px;
 }
