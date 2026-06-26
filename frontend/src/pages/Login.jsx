@@ -35,6 +35,11 @@ export default function Login({ onLogin }) {
 
   return (
     <div style={styles.page}>
+      {/* Back Navigation Arrow */}
+      <Link to="/" style={styles.backButton} title="Back to Home">
+        ←
+      </Link>
+
       {/* Premium background glows */}
       <div style={styles.glow1} />
       <div style={styles.glow2} />
@@ -94,6 +99,26 @@ const styles = {
     background: "var(--bg-primary)",
     fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif",
     overflow: "hidden",
+  },
+  backButton: {
+    position: "absolute",
+    top: "32px",
+    left: "32px",
+    width: "48px",
+    height: "48px",
+    borderRadius: "16px",
+    background: "#FFFFFF",
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    display: "grid",
+    placeItems: "center",
+    color: "var(--text-body)",
+    fontSize: "20px",
+    fontWeight: "800",
+    textDecoration: "none",
+    boxShadow: "0 4px 12px rgba(42, 27, 61, 0.05)",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    zIndex: 10,
   },
   glow1: {
     position: "absolute",

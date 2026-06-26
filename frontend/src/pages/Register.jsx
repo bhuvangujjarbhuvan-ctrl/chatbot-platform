@@ -28,6 +28,11 @@ export default function Register() {
 
   return (
     <div style={styles.page}>
+      {/* Back Navigation Arrow */}
+      <Link to="/" style={styles.backButton} title="Back to Home">
+        ←
+      </Link>
+
       <div style={styles.card}>
         <div style={styles.brand}>
           <div style={styles.logo}>🤖</div>
@@ -101,11 +106,32 @@ export default function Register() {
 
 const styles = {
   page: {
+    position: "relative",
     minHeight: "100vh",
     display: "grid",
     placeItems: "center",
     background: "var(--bg-primary)",
     fontFamily: "'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif",
+  },
+  backButton: {
+    position: "absolute",
+    top: "32px",
+    left: "32px",
+    width: "48px",
+    height: "48px",
+    borderRadius: "16px",
+    background: "#FFFFFF",
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    display: "grid",
+    placeItems: "center",
+    color: "var(--text-body)",
+    fontSize: "20px",
+    fontWeight: "800",
+    textDecoration: "none",
+    boxShadow: "0 4px 12px rgba(42, 27, 61, 0.05)",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    zIndex: 10,
   },
   card: {
     width: 320,
@@ -179,4 +205,3 @@ const styles = {
     width: "100%",
   },
 };
-
