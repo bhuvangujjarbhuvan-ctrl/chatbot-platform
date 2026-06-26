@@ -9,15 +9,39 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #030712;
+  background-color: var(--bg-primary);
 }
 
 /* 3D Visual Depth & Skeuomorphism utilities */
 :root {
-  --shadow-3d-sm: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
-  --shadow-3d-md: 0 8px 16px -4px rgba(0,0,0,0.5), 0 4px 6px -2px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
-  --shadow-3d-lg: 0 20px 25px -5px rgba(0,0,0,0.6), 0 10px 10px -5px rgba(0,0,0,0.6), inset 0 1.5px 2px rgba(255,255,255,0.12);
-  --shadow-3d-inset: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.05);
+  /* Deep Jewel Tone Dark-Mode Theme */
+  --bg-primary: #0B0E14;           /* Deep, near-black charcoal with a blue tint */
+  --bg-secondary: #131924;         /* Mid-tone slate for cards and panels */
+  --bg-tertiary: #1B2433;          /* Lighter card headers or selected list item states */
+  --bg-recessed: #06080C;          /* Ultra-dark inset background for inputs */
+
+  /* Primary Accent: Emerald Green */
+  --accent-primary: #006650;       /* Deep rich emerald green */
+  --accent-primary-hover: #008064; /* Vibrantly brighter for hover states */
+  --accent-primary-active: #004D3C;/* Deep dark emerald for button presses */
+  --accent-primary-glow: rgba(0, 102, 80, 0.35);
+
+  /* Secondary & Support Accents */
+  --accent-plum: #2D1B36;          /* Muted dark plum for cohesive variety */
+  --accent-plum-hover: #41284E;
+  --accent-navy: #152238;          /* Cohesive deep navy for secondary buttons or side panels */
+  
+  /* Text Color Hierarchy (WCAG AAA/AA Compliant) */
+  --text-heading: #FFFFFF;         /* Absolute white for contrast ratio > 15:1 */
+  --text-body: #E2E8F0;            /* Soft off-white for reading comfort */
+  --text-muted: #94A3B8;           /* Muted slate for subtitle/placeholder copy */
+  --text-on-accent: #FFFFFF;       /* Crisp white on emerald green */
+
+  /* Shadows */
+  --shadow-3d-sm: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  --shadow-3d-md: 0 8px 16px -4px rgba(0,0,0,0.6), 0 4px 6px -2px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.08);
+  --shadow-3d-lg: 0 20px 25px -5px rgba(0,0,0,0.7), 0 10px 10px -5px rgba(0,0,0,0.7), inset 0 1.5px 2px rgba(255,255,255,0.10);
+  --shadow-3d-inset: inset 0 2px 4px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.03);
 }
 
 .elevated-3d-card {
@@ -94,8 +118,8 @@ body {
 
 .app-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at top left, #0b1220, #060814);
-  color: #e8eefc;
+  background: radial-gradient(circle at top left, var(--bg-secondary), var(--bg-primary));
+  color: var(--text-body);
   font-family: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
@@ -118,8 +142,8 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #6d5efc, #22c55e);
-  box-shadow: 0 12px 30px rgba(109, 94, 252, 0.25);
+  background: linear-gradient(135deg, var(--accent-plum), var(--accent-primary));
+  box-shadow: 0 12px 30px var(--accent-primary-glow);
 }
 
 .top-title {
@@ -198,8 +222,8 @@ body {
 }
 
 .list-item.active {
-  border-color: rgba(109, 94, 252, 0.8);
-  box-shadow: 0 0 0 3px rgba(109, 94, 252, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-glow);
 }
 
 .list-title {
@@ -271,13 +295,13 @@ body {
 }
 
 .bubble.user {
-  background: linear-gradient(135deg, rgba(109, 94, 252, 0.35), rgba(109, 94, 252, 0.15));
-  border-color: rgba(109, 94, 252, 0.35);
+  background: linear-gradient(135deg, rgba(0, 102, 80, 0.35), rgba(45, 27, 54, 0.15));
+  border-color: rgba(0, 102, 80, 0.35);
 }
 
 .bubble.assistant {
-  background: rgba(34, 197, 94, 0.12);
-  border-color: rgba(34, 197, 94, 0.25);
+  background: rgba(0, 102, 80, 0.12);
+  border-color: rgba(0, 102, 80, 0.25);
 }
 
 .bubble-role {
@@ -318,7 +342,7 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #6d5efc, #4f46e5);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-plum));
   color: white;
   border: none;
 }
@@ -374,9 +398,9 @@ body {
 }
 
 .sidebar-list-item-active {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.15)) !important;
-  border-color: rgba(139, 92, 246, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+  background: linear-gradient(135deg, rgba(0, 102, 80, 0.25), rgba(45, 27, 54, 0.15)) !important;
+  border-color: rgba(0, 102, 80, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 102, 80, 0.1);
 }
 
 /* Sleek delete item hover effects */
