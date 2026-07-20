@@ -59,7 +59,7 @@ export default function Landing() {
         </div>
         <div style={styles.navActions}>
           <Link to="/login" style={styles.navLink}>Sign In</Link>
-          <Link to="/register" className="action-btn-gradient" style={styles.signUpBtn}>Sign Up</Link>
+          <Link to="/register" className="action-btn-gradient btn-3d-interactive" style={styles.signUpBtn}>Sign Up</Link>
         </div>
       </header>
 
@@ -74,10 +74,10 @@ export default function Landing() {
         </p>
 
         <div style={styles.ctaGroup}>
-          <Link to="/register" className="action-btn-gradient" style={styles.primaryCta}>
+          <Link to="/register" className="action-btn-gradient btn-3d-interactive" style={styles.primaryCta}>
             Get Started Free
           </Link>
-          <Link to="/login" style={styles.secondaryCta}>
+          <Link to="/login" className="btn-3d-interactive" style={styles.secondaryCta}>
             Access Workspace
           </Link>
         </div>
@@ -89,7 +89,7 @@ export default function Landing() {
 
         <div className="landing-grid">
           {features.map((f, i) => (
-            <div key={i} style={{ ...styles.card, background: f.color, borderColor: f.border }}>
+            <div key={i} className="elevated-3d-card" style={{ ...styles.card, background: f.color, borderColor: f.border }}>
               <div style={styles.cardIcon}>{f.icon}</div>
               <h3 style={styles.cardTitle}>{f.title}</h3>
               <p style={styles.cardDesc}>{f.desc}</p>

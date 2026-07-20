@@ -497,7 +497,7 @@ export default function Dashboard() {
               <div
                 key={p.id}
                 onClick={() => setSelectedProjectId(p.id)}
-                className={`sidebar-list-item ${p.id === selectedProjectId ? 'sidebar-list-item-active' : ''}`}
+                className={`sidebar-list-item btn-3d-interactive ${p.id === selectedProjectId ? 'sidebar-list-item-active' : ''}`}
                 style={{
                   ...styles.listItem,
                   ...(p.id === selectedProjectId ? styles.listItemActive : {}),
@@ -535,7 +535,7 @@ export default function Dashboard() {
           <div className="sidebar-search-container" style={styles.searchContainer}>
             <input
               type="text"
-              className="sidebar-search-input"
+              className="sidebar-search-input input-3d"
               style={styles.searchInput}
               placeholder="Search chats..."
               value={searchQuery}
@@ -556,7 +556,7 @@ export default function Dashboard() {
               <div
                 key={c.id}
                 onClick={() => setSelectedChatId(c.id)}
-                className={`sidebar-list-item ${c.id === selectedChatId ? 'sidebar-list-item-active' : ''}`}
+                className={`sidebar-list-item btn-3d-interactive ${c.id === selectedChatId ? 'sidebar-list-item-active' : ''}`}
                 style={{
                   ...styles.listItem,
                   ...(c.id === selectedChatId ? styles.listItemActive : {}),
@@ -644,7 +644,7 @@ export default function Dashboard() {
               {selectedChat && !showSettings && (
                 <div style={{ display: "flex", gap: 8 }}>
                   <button
-                    className="action-btn-gradient"
+                    className="action-btn-gradient btn-3d-interactive"
                     style={{
                       padding: "8px 12px",
                       borderRadius: 10,
@@ -660,7 +660,7 @@ export default function Dashboard() {
                     Export .MD
                   </button>
                   <button
-                    className="action-btn-gradient"
+                    className="action-btn-gradient btn-3d-interactive"
                     style={{
                       padding: "8px 12px",
                       borderRadius: 10,
@@ -734,7 +734,7 @@ export default function Dashboard() {
                 {PROMPT_TEMPLATES.map((tmpl) => (
                   <div
                     key={tmpl.title}
-                    className="preset-card-hover"
+                    className="elevated-3d-card preset-card-hover btn-3d-interactive"
                     style={styles.presetCard}
                     onClick={() => {
                       setNewPromptTitle(tmpl.title);
@@ -969,6 +969,7 @@ const styles = {
     gap: 12,
     background: "rgba(255,255,255,0.03)",
     backdropFilter: "blur(12px)",
+    boxShadow: "inset -6px 0 16px rgba(0, 0, 0, 0.65)",
   },
   brand: {
     display: "flex",
@@ -1070,10 +1071,14 @@ const styles = {
     borderRadius: 14,
     cursor: "pointer",
     color: "#fff",
+    boxShadow: "0 4px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)",
+    borderBottom: "3px solid rgba(0, 0, 0, 0.4)",
   },
   listItemActive: {
-    background: "linear-gradient(135deg, rgba(34,197,94,0.25), rgba(59,130,246,0.25))",
-    border: "1px solid rgba(255,255,255,0.18)",
+    background: "linear-gradient(135deg, rgba(34,197,94,0.18), rgba(59,130,246,0.18))",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    boxShadow: "inset 0 4px 8px rgba(0,0,0,0.7), 0 1px 1px rgba(255,255,255,0.05)",
   },
   muted: { opacity: 0.7, fontSize: 13 },
   smallMuted: { opacity: 0.65, fontSize: 12, marginTop: 2 },
@@ -1221,12 +1226,17 @@ const styles = {
     borderRadius: 18,
     border: "1px solid rgba(255,255,255,0.10)",
     background: "rgba(255,255,255,0.06)",
+    boxShadow: "0 8px 16px -4px rgba(0,0,0,0.4), 0 4px 6px -2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
   },
   userBubble: {
-    background: "linear-gradient(135deg, rgba(34,197,94,0.25), rgba(59,130,246,0.25))",
+    background: "linear-gradient(135deg, rgba(34,197,94,0.3), rgba(59,130,246,0.3))",
+    border: "1px solid rgba(59,130,246,0.2)",
+    borderBottom: "2px solid rgba(59,130,246,0.25)",
   },
   aiBubble: {
-    background: "rgba(255,255,255,0.05)",
+    background: "linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.85))",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderBottom: "2px solid rgba(255,255,255,0.06)",
   },
   msgRole: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, opacity: 0.75, marginBottom: 6, fontWeight: 700 },
   msgText: { whiteSpace: "pre-wrap", lineHeight: 1.4 },
